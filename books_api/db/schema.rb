@@ -19,10 +19,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_30_145511) do
     t.string "author"
     t.integer "isbn"
     t.datetime "published_date"
-    t.integer "status"
+    t.integer "status", default: 0
     t.datetime "borrowed_until"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
-
 end
