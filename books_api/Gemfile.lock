@@ -76,12 +76,20 @@ GEM
     debug (1.11.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    diff-lcs (1.6.2)
     dotenv (3.1.8)
     dotenv-rails (3.1.8)
       dotenv (= 3.1.8)
       railties (>= 6.1)
     erb (5.0.2)
     erubi (1.13.1)
+    factory_bot (6.5.5)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.5.0)
+      factory_bot (~> 6.5)
+      railties (>= 6.1.0)
+    faker (3.5.2)
+      i18n (>= 1.8.11, < 2)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.7)
@@ -187,6 +195,25 @@ GEM
       psych (>= 4.0.0)
     reline (0.6.2)
       io-console (~> 0.5)
+    rspec-core (3.13.5)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-rails (7.1.1)
+      actionpack (>= 7.0)
+      activesupport (>= 7.0)
+      railties (>= 7.0)
+      rspec-core (~> 3.13)
+      rspec-expectations (~> 3.13)
+      rspec-mocks (~> 3.13)
+      rspec-support (~> 3.13)
+    rspec-support (3.13.5)
+    shoulda-matchers (6.5.0)
+      activesupport (>= 5.2.0)
     stringio (3.1.7)
     thor (1.4.0)
     timeout (0.4.3)
@@ -214,11 +241,15 @@ DEPENDENCIES
   bootsnap
   debug
   dotenv-rails
+  factory_bot_rails
+  faker
   jbuilder
   logger
   pg
   puma (~> 5.0)
   rails (~> 7.0.1)
+  rspec-rails
+  shoulda-matchers
   tzinfo-data
 
 RUBY VERSION
