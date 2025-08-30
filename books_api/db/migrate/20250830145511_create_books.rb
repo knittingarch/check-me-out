@@ -5,7 +5,7 @@ class CreateBooks < ActiveRecord::Migration[7.0]
       t.string :author
       t.integer :isbn
       t.datetime :published_date
-      t.integer :status
+      t.integer :status, default: 0
       t.datetime :borrowed_until
 
       t.timestamps
