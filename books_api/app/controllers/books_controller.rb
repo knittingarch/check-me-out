@@ -114,7 +114,7 @@ class BooksController < ApplicationController
     @books = @books.limit(per_page).offset(offset)
 
     # Calculate pagination metadata
-    total_pages = (total_count.to_f / per_page).ceil
+    total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil
 
     # Prepare response with pagination metadata
     response_data = {
