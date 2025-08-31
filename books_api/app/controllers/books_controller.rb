@@ -4,7 +4,7 @@ class BooksController < ApplicationController
   rescue_from ActionDispatch::Http::Parameters::ParseError, with: :bad_request
 
   # GET /books
-# GET /books.json
+  # GET /books.json
   def index
     @books = Book.all
 
@@ -65,7 +65,7 @@ class BooksController < ApplicationController
 
     # Search by multiple titles
     if params[:title].present?
-     titles = params[:title].split(',').map(&:strip).reject(&:blank?)
+      titles = params[:title].split(',').map(&:strip).reject(&:blank?)
 
       # Limit number of titles to prevent abuse
       return unless validate_filter_count(titles, "title")
