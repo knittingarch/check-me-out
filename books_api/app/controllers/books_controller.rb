@@ -49,13 +49,18 @@ class BooksController < ApplicationController
   def search
     @books = Book.all
 
+    has_q_filter = false
     if params[:q].present?
-      clean_query = params[:q].gsub(/^["']|["']$/, '')
+      clean_query = params[:q].gsub(/^["']|["']$/, '').strip
 
-      @books = @books.where(
-        "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
-        "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
-      )
+      # Only apply the filter if there's actually content after cleaning
+      if clean_query.present?
+        @books = @books.where(
+          "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
+          "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
+        )
+        has_q_filter = true
+      end
     end
 
     # Search by multiple titles
@@ -118,14 +123,21 @@ class BooksController < ApplicationController
     if params[:borrowed_until].present?
       begin
         borrowed_until_date = Date.parse(params[:borrowed_until])
-        @books = @books.where("borrowed_until <= ?", borrowed_until_date)
+
+        @books = @books.where("borrowed_until IS NULL OR borrowed_until <= ?", borrowed_until_date)
       rescue ArgumentError
         return render json: { error: "Invalid date format. Please use YYYY-MM-DD." }, status: :bad_request
       end
     end
 
-    search_params = [:q, :title, :author, :isbn, :status]
-    if search_params.none? { |param| params[param].present? }
+    # Check if any meaningful search criteria was provided
+    other_params = [:title, :author, :isbn, :status, :borrowed_until]
+    has_other_filters = other_params.any? { |param| params[param].present? }
+
+    # Allow empty/whitespace q parameter to return all books
+    has_empty_q = params.key?(:q) && params[:q].gsub(/^["']|["']$/, '').strip.blank?
+
+    if !has_q_filter && !has_other_filters && !has_empty_q
       return render json: { error: "At least one search parameter is required" }, status: :bad_request
     end
 

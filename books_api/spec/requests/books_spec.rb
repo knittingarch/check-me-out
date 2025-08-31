@@ -310,10 +310,11 @@ RSpec.describe "/books", type: :request do
 
   describe "GET /books/search" do
     before do
-      create(:book, title: "Ruby for Beginners", author: "Jane Smith", isbn: "9780123456789")
-      create(:book, title: "JavaScript Fundamentals", author: "Ruby Johnson", isbn: "9780987654321")
-      create(:book, title: "Python Programming", author: "John Doe", isbn: "9781234567ruby")
-      create(:book, title: "Data Science Guide", author: "Alice Brown", isbn: "9780555666777")
+      create(:book, title: "Ruby for Beginners", author: "Jane Smith", isbn: "9780123456789", status: "available")
+      create(:book, title: "JavaScript Fundamentals", author: "Ruby Johnson", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now)
+      create(:book, title: "Python Programming", author: "John Doe", isbn: "9781234567ruby", status: "reserved")
+      create(:book, title: "Data Science Guide", author: "Alice Brown", isbn: "9780555666777", status: "available")
+      create(:book, title: "Advanced Ruby", author: "Bob Wilson", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now)
     end
 
     context "with valid search parameter" do
@@ -445,19 +446,20 @@ RSpec.describe "/books", type: :request do
 
         json_response = JSON.parse(response.body)
 
-        expect(json_response.length).to eq(3)
+        expect(json_response.length).to eq(4)
 
         # Extract the returned books' data for easier assertions
         returned_titles = json_response.map { |book| book["title"] }
         returned_authors = json_response.map { |book| book["author"] }
         returned_isbns = json_response.map { |book| book["isbn"] }
 
-        expect(returned_titles).to include("Ruby for Beginners")        # "ruby" in title
-        expect(returned_authors).to include("Ruby Johnson")              # "ruby" in author
-        expect(returned_isbns).to include("9781234567ruby")             # "ruby" in ISBN
+        expect(returned_titles).to include("Ruby for Beginners", "Advanced Ruby")  # "ruby" in title
+        expect(returned_authors).to include("Ruby Johnson")                        # "ruby" in author
+        expect(returned_isbns).to include("9781234567ruby")                       # "ruby" in ISBN
 
         expect(returned_titles).to match_array([
           "Ruby for Beginners",
+          "Advanced Ruby",
           "JavaScript Fundamentals",
           "Python Programming"
         ])
@@ -471,25 +473,23 @@ RSpec.describe "/books", type: :request do
         expect(response).to have_http_status(:bad_request)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq("Search query parameter is required")
+        expect(json_response["error"]).to include("At least one search parameter is required")
       end
 
-      it "returns bad request error when q parameter is empty" do
+      it "returns all books when q parameter is empty" do
         get "/books/search?q=", headers: valid_headers
 
-        expect(response).to have_http_status(:bad_request)
-
+        expect(response).to be_successful
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq("Search query parameter is required")
+        expect(json_response.length).to eq(5) # Should return all books created in before block
       end
 
-      it "returns bad request error when q parameter is only whitespace" do
+      it "returns all books when q parameter is only whitespace" do
         get "/books/search?q=   ", headers: valid_headers
 
-        expect(response).to have_http_status(:bad_request)
-
+        expect(response).to be_successful
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq("Search query parameter is required")
+        expect(json_response.length).to eq(5) # Should return all books created in before block
       end
     end
 
@@ -517,6 +517,228 @@ RSpec.describe "/books", type: :request do
         expect(book).to have_key("status")
         expect(book).to have_key("created_at")
         expect(book).to have_key("updated_at")
+      end
+    end
+
+    context "with multiple title search" do
+      it "searches for multiple titles with comma separation" do
+        get "/books/search?title=Ruby,JavaScript", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(3)
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to include("Ruby for Beginners", "Advanced Ruby", "JavaScript Fundamentals")
+      end
+
+      it "handles empty values in comma-separated titles" do
+        get "/books/search?title=Ruby,,JavaScript,", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(3)
+      end
+
+      it "limits number of title filters" do
+        many_titles = Array.new(15, "Ruby").join(',')
+        get "/books/search?title=#{many_titles}", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Too many title filters")
+      end
+    end
+
+    context "with multiple author search" do
+      it "searches for multiple authors with comma separation" do
+        get "/books/search?author=Jane Smith,Bob Wilson", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(2)
+        authors = json_response.map { |book| book["author"] }
+        titles = json_response.map { |book| book["title"] }
+        expect(authors).to include("Jane Smith", "Bob Wilson")
+        expect(titles).to include("Ruby for Beginners", "Advanced Ruby")
+      end
+
+      it "limits number of author filters" do
+        many_authors = Array.new(15, "Smith").join(',')
+        get "/books/search?author=#{many_authors}", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Too many author filters")
+      end
+    end
+
+    context "with multiple ISBN search" do
+      it "searches for multiple ISBNs with comma separation" do
+        get "/books/search?isbn=9780123456789,9780987654321", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(2)
+        isbns = json_response.map { |book| book["isbn"] }
+        titles = json_response.map { |book| book["title"] }
+        expect(isbns).to include("9780123456789", "9780987654321")
+        expect(titles).to include("Ruby for Beginners", "JavaScript Fundamentals")
+      end
+
+      it "limits number of ISBN filters" do
+        many_isbns = Array.new(15, "123456789").join(',')
+        get "/books/search?isbn=#{many_isbns}", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Too many ISBN filters")
+      end
+    end
+
+    context "with status filtering" do
+      it "filters books by available status" do
+        get "/books/search?status=available", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(2) # Ruby for Beginners and Data Science Guide
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to include("Ruby for Beginners", "Data Science Guide")
+        json_response.each do |book|
+          expect(book["status"]).to eq("available")
+        end
+      end
+
+      it "filters books by borrowed status" do
+        get "/books/search?status=borrowed", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(2) # JavaScript Fundamentals and Advanced Ruby
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to include("JavaScript Fundamentals", "Advanced Ruby")
+        json_response.each do |book|
+          expect(book["status"]).to eq("borrowed")
+        end
+      end
+
+      it "returns error for invalid status" do
+        get "/books/search?status=invalid", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Invalid status")
+        expect(json_response["error"]).to include("available, borrowed, reserved")
+      end
+    end
+
+    context "with borrowed until date filtering" do
+      it "finds books that will be available by the given date" do
+        future_date = 3.days.from_now.strftime("%Y-%m-%d")
+        get "/books/search?borrowed_until=#{future_date}", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        # Should find:
+        # - Books not currently borrowed (borrowed_until IS NULL): Ruby for Beginners, Data Science Guide, Python Programming
+        # - Books that will be returned by 3 days from now: Advanced Ruby (returns in 2 days)
+        # Should NOT find: JavaScript Fundamentals (returns in 1 week > 3 days)
+        expect(json_response.length).to eq(4)
+
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to include("Ruby for Beginners", "Data Science Guide", "Python Programming", "Advanced Ruby")
+        expect(titles).not_to include("JavaScript Fundamentals")
+      end
+
+      it "returns error for invalid date format" do
+        get "/books/search?borrowed_until=invalid-date", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Invalid date format")
+        expect(json_response["error"]).to include("YYYY-MM-DD")
+      end
+    end
+
+    context "with combined search parameters" do
+      it "combines title and status filters" do
+        get "/books/search?title=Ruby&status=available", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+        book = json_response.first
+        expect(book["title"]).to eq("Ruby for Beginners")
+        expect(book["status"]).to eq("available")
+      end
+
+      it "combines author and status filters" do
+        get "/books/search?author=Johnson&status=borrowed", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+        book = json_response.first
+        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["status"]).to eq("borrowed")
+      end
+
+      it "combines general search with status filter" do
+        get "/books/search?q=Ruby&status=borrowed", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        # Should find JavaScript Fundamentals (author: Ruby Johnson, status: borrowed)
+        # and Advanced Ruby (title contains Ruby, status: borrowed)
+        expect(json_response.length).to eq(2)
+
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to include("JavaScript Fundamentals", "Advanced Ruby")
+
+        json_response.each do |book|
+          expect(book["status"]).to eq("borrowed")
+        end
+      end
+
+      it "finds available books by ISBN that will be available by a given date" do
+        # Use a date far in the future to ensure it includes books that will be returned by then
+        future_date = 2.weeks.from_now.strftime("%Y-%m-%d")
+        get "/books/search?isbn=9780987654321,9780555666777&borrowed_until=#{future_date}&status=available", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+        book = json_response.first
+        expect(book["title"]).to eq("Data Science Guide")
+      end
+    end
+
+    context "enhanced error handling" do
+      it "requires at least one search parameter" do
+        get "/books/search", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("At least one search parameter is required")
+      end
+
+      it "handles whitespace-only parameters gracefully" do
+        get "/books/search?title=   ", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("At least one search parameter is required")
       end
     end
   end
