@@ -7,8 +7,8 @@ FactoryBot.define do
     status { :available }
     borrowed_until { nil }
 
-    trait :checked_out do
-      status { :checked_out }
+    trait :borrowed do
+      status { :borrowed }
       borrowed_until { 1.week.from_now }
     end
 
