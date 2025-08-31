@@ -68,9 +68,7 @@ class BooksController < ApplicationController
      titles = params[:title].split(',').map(&:strip).reject(&:blank?)
 
       # Limit number of titles to prevent abuse
-      if titles.length > 10
-        return render json: { error: "Too many title filters. Maximum 10 allowed." }, status: :bad_request
-      end
+      return unless validate_filter_count(titles, "title")
 
       if titles.any?
         title_conditions = titles.map { "title ILIKE ?" }.join(' OR ')
@@ -83,9 +81,7 @@ class BooksController < ApplicationController
     if params[:author].present?
       authors = params[:author].split(',').map(&:strip).reject(&:blank?)
 
-      if authors.length > 10
-        return render json: { error: "Too many author filters. Maximum 10 allowed." }, status: :bad_request
-      end
+      return unless validate_filter_count(authors, "author")
 
       if authors.any?
         author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
@@ -98,9 +94,7 @@ class BooksController < ApplicationController
     if params[:isbn].present?
       isbns = params[:isbn].split(',').map(&:strip).reject(&:blank?)
 
-      if isbns.length > 10
-        return render json: { error: "Too many ISBN filters. Maximum 10 allowed." }, status: :bad_request
-      end
+      return unless validate_filter_count(isbns, "ISBN")
 
       if isbns.any?
         isbn_conditions = isbns.map { "isbn ILIKE ?" }.join(' OR ')
@@ -151,6 +145,14 @@ class BooksController < ApplicationController
 
     def book_params
       params.require(:book).permit(:title, :author, :isbn, :published_date, :status, :borrowed_until)
+    end
+
+    def validate_filter_count(values, filter_type, max_count = 10)
+      if values.length > max_count
+        render json: { error: "Too many #{filter_type} filters. Maximum #{max_count} allowed." }, status: :bad_request
+        return false
+      end
+      true
     end
 
     def record_not_found
