@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :book do
     title { Faker::Book.title }
     author { Faker::Book.author }
-    isbn { Faker::Number.number(digits: 13) }
+    isbn { Faker::Code.isbn }
     published_date { Faker::Date.between(from: 50.years.ago, to: Date.current) }
     status { :available }
     borrowed_until { nil }
