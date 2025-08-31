@@ -319,7 +319,7 @@ RSpec.describe "/books", type: :request do
 
     context "with valid search parameter" do
       it "returns books matching title search" do
-        get "/books/search?q=JavaScript", headers: valid_headers
+        get "/books/search?filter[q]=JavaScript", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -334,7 +334,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns books matching author search" do
-        get "/books/search?q=Smith", headers: valid_headers
+        get "/books/search?filter[q]=Smith", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -349,7 +349,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns books matching ISBN search" do
-        get "/books/search?q=9780123456789", headers: valid_headers
+        get "/books/search?filter[q]=9780123456789", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -364,7 +364,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns books matching partial ISBN search" do
-        get "/books/search?q=555666", headers: valid_headers
+        get "/books/search?filter[q]=555666", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -379,7 +379,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "performs case-insensitive search" do
-        get "/books/search?q=DAta", headers: valid_headers
+        get "/books/search?filter[q]=DAta", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -388,7 +388,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns partial matches" do
-        get "/books/search?q=Guide", headers: valid_headers
+        get "/books/search?filter[q]=Guide", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -403,7 +403,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "strips surrounding double quotes from search query" do
-        get '/books/search?q="Python"', headers: valid_headers
+        get '/books/search?filter[q]="Python"', headers: valid_headers
 
         expect(response).to be_successful
 
@@ -418,7 +418,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "strips surrounding single quotes from search query" do
-        get "/books/search?q='JavaScript'", headers: valid_headers
+        get "/books/search?filter[q]='JavaScript'", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -433,14 +433,14 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns empty array when no matches found" do
-        get "/books/search?q=Nonexistent Book", headers: valid_headers
+        get "/books/search?filter[q]=Nonexistent Book", headers: valid_headers
 
         expect(response).to be_successful
         expect(JSON.parse(response.body)).to eq([])
       end
 
       it "searches across multiple fields simultaneously" do
-        get "/books/search?q=ruby", headers: valid_headers
+        get "/books/search?filter[q]=ruby", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -477,7 +477,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns all books when q parameter is empty" do
-        get "/books/search?q=", headers: valid_headers
+        get "/books/search?filter[q]=", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -485,7 +485,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns all books when q parameter is only whitespace" do
-        get "/books/search?q=   ", headers: valid_headers
+        get "/books/search?filter[q]=   ", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -495,14 +495,14 @@ RSpec.describe "/books", type: :request do
 
     context "response format" do
       it "returns JSON content type" do
-        get "/books/search?q=JavaScript", headers: valid_headers
+        get "/books/search?filter[q]=JavaScript", headers: valid_headers
 
         expect(response).to be_successful
         expect(response.content_type).to match(a_string_including("application/json"))
       end
 
       it "returns complete book objects with all attributes" do
-        get "/books/search?q=Ruby", headers: valid_headers
+        get "/books/search?filter[q]=Ruby", headers: valid_headers
 
         expect(response).to be_successful
 
@@ -522,7 +522,7 @@ RSpec.describe "/books", type: :request do
 
     context "with multiple title search" do
       it "searches for multiple titles with comma separation" do
-        get "/books/search?title=Ruby,JavaScript", headers: valid_headers
+        get "/books/search?filter[title]=Ruby,JavaScript", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -533,7 +533,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "handles empty values in comma-separated titles" do
-        get "/books/search?title=Ruby,,JavaScript,", headers: valid_headers
+        get "/books/search?filter[title]=Ruby,,JavaScript,", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -543,7 +543,7 @@ RSpec.describe "/books", type: :request do
 
       it "limits number of title filters" do
         many_titles = Array.new(15, "Ruby").join(',')
-        get "/books/search?title=#{many_titles}", headers: valid_headers
+        get "/books/search?filter[title]=#{many_titles}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
@@ -553,7 +553,7 @@ RSpec.describe "/books", type: :request do
 
     context "with multiple author search" do
       it "searches for multiple authors with comma separation" do
-        get "/books/search?author=Jane Smith,Bob Wilson", headers: valid_headers
+        get "/books/search?filter[author]=Jane Smith,Bob Wilson", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -567,7 +567,7 @@ RSpec.describe "/books", type: :request do
 
       it "limits number of author filters" do
         many_authors = Array.new(15, "Smith").join(',')
-        get "/books/search?author=#{many_authors}", headers: valid_headers
+        get "/books/search?filter[author]=#{many_authors}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
@@ -577,7 +577,7 @@ RSpec.describe "/books", type: :request do
 
     context "with multiple ISBN search" do
       it "searches for multiple ISBNs with comma separation" do
-        get "/books/search?isbn=9780123456789,9780987654321", headers: valid_headers
+        get "/books/search?filter[isbn]=9780123456789,9780987654321", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -591,7 +591,7 @@ RSpec.describe "/books", type: :request do
 
       it "limits number of ISBN filters" do
         many_isbns = Array.new(15, "123456789").join(',')
-        get "/books/search?isbn=#{many_isbns}", headers: valid_headers
+        get "/books/search?filter[isbn]=#{many_isbns}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
@@ -601,7 +601,7 @@ RSpec.describe "/books", type: :request do
 
     context "with status filtering" do
       it "filters books by available status" do
-        get "/books/search?status=available", headers: valid_headers
+        get "/books/search?filter[status]=available", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -615,7 +615,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "filters books by borrowed status" do
-        get "/books/search?status=borrowed", headers: valid_headers
+        get "/books/search?filter[status]=borrowed", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -629,7 +629,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns error for invalid status" do
-        get "/books/search?status=invalid", headers: valid_headers
+        get "/books/search?filter[status]=invalid", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
@@ -641,7 +641,7 @@ RSpec.describe "/books", type: :request do
     context "with borrowed until date filtering" do
       it "finds books that will be available by the given date" do
         future_date = 3.days.from_now.strftime("%Y-%m-%d")
-        get "/books/search?borrowed_until=#{future_date}", headers: valid_headers
+        get "/books/search?filter[borrowed_until]=#{future_date}", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -658,7 +658,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns error for invalid date format" do
-        get "/books/search?borrowed_until=invalid-date", headers: valid_headers
+        get "/books/search?filter[borrowed_until]=invalid-date", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
@@ -669,7 +669,7 @@ RSpec.describe "/books", type: :request do
 
     context "with combined search parameters" do
       it "combines title and status filters" do
-        get "/books/search?title=Ruby&status=available", headers: valid_headers
+        get "/books/search?filter[title]=Ruby&filter[status]=available", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -681,7 +681,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "combines author and status filters" do
-        get "/books/search?author=Johnson&status=borrowed", headers: valid_headers
+        get "/books/search?filter[author]=Johnson&filter[status]=borrowed", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -693,7 +693,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "combines general search with status filter" do
-        get "/books/search?q=Ruby&status=borrowed", headers: valid_headers
+        get "/books/search?filter[q]=Ruby&filter[status]=borrowed", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -713,7 +713,7 @@ RSpec.describe "/books", type: :request do
       it "finds available books by ISBN that will be available by a given date" do
         # Use a date far in the future to ensure it includes books that will be returned by then
         future_date = 2.weeks.from_now.strftime("%Y-%m-%d")
-        get "/books/search?isbn=9780987654321,9780555666777&borrowed_until=#{future_date}&status=available", headers: valid_headers
+        get "/books/search?filter[isbn]=9780987654321,9780555666777&filter[borrowed_until]=#{future_date}&filter[status]=available", headers: valid_headers
 
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
@@ -734,7 +734,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "handles whitespace-only parameters gracefully" do
-        get "/books/search?title=   ", headers: valid_headers
+        get "/books/search?filter[title]=   ", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
