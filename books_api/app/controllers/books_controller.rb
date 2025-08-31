@@ -47,21 +47,89 @@ class BooksController < ApplicationController
   end
 
   def search
-    query = params[:q]
+    @books = Book.all
 
-    if query.present?
-      # Strip any surrounding quotes that might be included in the parameter
-      clean_query = query.gsub(/^["']|["']$/, '')
+    if params[:q].present?
+      clean_query = params[:q].gsub(/^["']|["']$/, '')
 
-      @books = Book.where(
+      @books = @books.where(
         "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
         "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
       )
-
-      render json: @books
-    else
-      render json: { error: "Search query parameter is required" }, status: :bad_request
     end
+
+    # Search by multiple titles
+    if params[:title].present?
+     titles = params[:title].split(',').map(&:strip).reject(&:blank?)
+
+      # Limit number of titles to prevent abuse
+      if titles.length > 10
+        return render json: { error: "Too many title filters. Maximum 10 allowed." }, status: :bad_request
+      end
+
+      if titles.any?
+        title_conditions = titles.map { "title ILIKE ?" }.join(' OR ')
+        title_values = titles.map { |title| "%#{title}%" }
+        @books = @books.where(title_conditions, *title_values)
+      end
+    end
+
+    # Search by multiple authors
+    if params[:author].present?
+      authors = params[:author].split(',').map(&:strip).reject(&:blank?)
+
+      if authors.length > 10
+        return render json: { error: "Too many author filters. Maximum 10 allowed." }, status: :bad_request
+      end
+
+      if authors.any?
+        author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
+        author_values = authors.map { |author| "%#{author}%" }
+        @books = @books.where(author_conditions, *author_values)
+      end
+    end
+
+    # Search by multiple ISBNS
+    if params[:isbn].present?
+      isbns = params[:isbn].split(',').map(&:strip).reject(&:blank?)
+
+      if isbns.length > 10
+        return render json: { error: "Too many ISBN filters. Maximum 10 allowed." }, status: :bad_request
+      end
+
+      if isbns.any?
+        isbn_conditions = isbns.map { "isbn ILIKE ?" }.join(' OR ')
+        isbn_values = isbns.map { |isbn| "%#{isbn}%" }
+        @books = @books.where(isbn_conditions, *isbn_values)
+      end
+    end
+
+    # Filter by Status
+    if params[:status].present?
+      valid_statuses = ['available', 'borrowed', 'reserved']
+      if valid_statuses.include?(params[:status])
+        @books = @books.where(status: params[:status])
+      else
+        return render json: { error: "Invalid status. Must be: #{valid_statuses.join(', ')}" }, status: :bad_request
+      end
+    end
+
+    # Filter by Borrowed Until Date
+    if params[:borrowed_until].present?
+      begin
+        borrowed_until_date = Date.parse(params[:borrowed_until])
+        @books = @books.where("borrowed_until <= ?", borrowed_until_date)
+      rescue ArgumentError
+        return render json: { error: "Invalid date format. Please use YYYY-MM-DD." }, status: :bad_request
+      end
+    end
+
+    search_params = [:q, :title, :author, :isbn, :status]
+    if search_params.none? { |param| params[param].present? }
+      return render json: { error: "At least one search parameter is required" }, status: :bad_request
+    end
+
+    render json: @books
   end
 
   private
