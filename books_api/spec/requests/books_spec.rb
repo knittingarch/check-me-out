@@ -27,13 +27,13 @@ RSpec.describe "/books", type: :request do
     it "renders a successful response" do
       create(:book)
 
-      get books_url, headers: valid_headers, as: :json
+      get books_url, headers: valid_headers
 
       expect(response).to be_successful
     end
 
     it "returns an empty array when no books exist" do
-      get books_url, headers: valid_headers, as: :json
+      get books_url, headers: valid_headers
 
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to eq([])
@@ -43,7 +43,7 @@ RSpec.describe "/books", type: :request do
       book1 = create(:book, title: "Book 1")
       book2 = create(:book, title: "Book 2")
 
-      get books_url, headers: valid_headers, as: :json
+      get books_url, headers: valid_headers
 
       expect(response).to be_successful
 
@@ -59,7 +59,7 @@ RSpec.describe "/books", type: :request do
     it "renders a successful response" do
       book = create(:book)
 
-      get book_url(book), headers: valid_headers, as: :json
+      get book_url(book), headers: valid_headers
 
       expect(response).to be_successful
     end
@@ -67,7 +67,7 @@ RSpec.describe "/books", type: :request do
     it "returns the correct book data" do
       book = create(:book, title: "Specific Book", author: "Specific Author")
 
-      get book_url(book), headers: valid_headers, as: :json
+      get book_url(book), headers: valid_headers
 
       expect(response).to be_successful
 
@@ -79,7 +79,7 @@ RSpec.describe "/books", type: :request do
     end
 
     it "returns 404 for non-existent book" do
-      get book_url(id: 999999), headers: valid_headers, as: :json
+      get book_url(id: 999999), headers: valid_headers
 
       expect(response).to have_http_status(:not_found)
     end
@@ -90,13 +90,13 @@ RSpec.describe "/books", type: :request do
       it "creates a new Book" do
         expect {
           post books_url,
-               params: { book: valid_attributes }, headers: valid_headers, as: :json
+               params: { book: valid_attributes }.to_json, headers: valid_headers
         }.to change(Book, :count).by(1)
       end
 
       it "renders a JSON response with the new book" do
         post books_url,
-             params: { book: valid_attributes }, headers: valid_headers, as: :json
+             params: { book: valid_attributes }.to_json, headers: valid_headers
 
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -104,7 +104,7 @@ RSpec.describe "/books", type: :request do
 
       it "returns the created book with correct attributes" do
         post books_url,
-             params: { book: valid_attributes }, headers: valid_headers, as: :json
+             params: { book: valid_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
 
@@ -116,7 +116,7 @@ RSpec.describe "/books", type: :request do
 
       it "sets the location header" do
         post books_url,
-             params: { book: valid_attributes }, headers: valid_headers, as: :json
+             params: { book: valid_attributes }.to_json, headers: valid_headers
 
         created_book = Book.last
 
@@ -138,7 +138,7 @@ RSpec.describe "/books", type: :request do
         book = create(:book)
 
         patch book_url(book),
-              params: { book: new_attributes }, headers: valid_headers, as: :json
+              params: { book: new_attributes }.to_json, headers: valid_headers
         book.reload
 
         expect(book.title).to eq("Updated Book Title")
@@ -149,7 +149,7 @@ RSpec.describe "/books", type: :request do
         book = create(:book)
 
         patch book_url(book),
-              params: { book: new_attributes }, headers: valid_headers, as: :json
+              params: { book: new_attributes }.to_json, headers: valid_headers
 
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -159,7 +159,7 @@ RSpec.describe "/books", type: :request do
         book = create(:book, title: "Original Title")
 
         patch book_url(book),
-              params: { book: new_attributes }, headers: valid_headers, as: :json
+              params: { book: new_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
 
@@ -171,8 +171,8 @@ RSpec.describe "/books", type: :request do
         book = create(:book, status: "available")
 
         patch book_url(book),
-              params: { book: { status: "borrowed", borrowed_until: 1.week.from_now } },
-              headers: valid_headers, as: :json
+              params: { book: { status: "borrowed", borrowed_until: 1.week.from_now } }.to_json,
+              headers: valid_headers
 
         book.reload
 
@@ -186,14 +186,14 @@ RSpec.describe "/books", type: :request do
         book = create(:book)
 
         patch book_url(book),
-              params: { book: { title: "Updated Title" } }, headers: valid_headers, as: :json
+              params: { book: { title: "Updated Title" } }.to_json, headers: valid_headers
 
         expect(response).to have_http_status(:ok)
       end
 
       it "returns 404 for non-existent book" do
         patch book_url(id: 999999),
-              params: { book: { title: "Updated Title" } }, headers: valid_headers, as: :json
+              params: { book: { title: "Updated Title" } }.to_json, headers: valid_headers
 
         expect(response).to have_http_status(:not_found)
       end
@@ -205,20 +205,20 @@ RSpec.describe "/books", type: :request do
       book = create(:book)
 
       expect {
-        delete book_url(book), headers: valid_headers, as: :json
+        delete book_url(book), headers: valid_headers
       }.to change(Book, :count).by(-1)
     end
 
     it "returns no content status" do
       book = create(:book)
 
-      delete book_url(book), headers: valid_headers, as: :json
+      delete book_url(book), headers: valid_headers
 
       expect(response).to have_http_status(:no_content)
     end
 
     it "returns 404 for non-existent book" do
-      delete book_url(id: 999999), headers: valid_headers, as: :json
+      delete book_url(id: 999999), headers: valid_headers
 
       expect(response).to have_http_status(:not_found)
     end
@@ -227,7 +227,7 @@ RSpec.describe "/books", type: :request do
       book = create(:book)
       book_id = book.id
 
-      delete book_url(book), headers: valid_headers, as: :json
+      delete book_url(book), headers: valid_headers
 
       expect { Book.find(book_id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
@@ -254,8 +254,8 @@ RSpec.describe "/books", type: :request do
                 title: "New Title",
                 unpermitted_param: "should be ignored",
               }
-            },
-            headers: valid_headers, as: :json
+            }.to_json,
+            headers: valid_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -279,8 +279,8 @@ RSpec.describe "/books", type: :request do
                 unpermitted_param: "should be ignored",
                 another_bad_param: "also ignored"
               }
-            },
-            headers: valid_headers, as: :json
+            }.to_json,
+            headers: valid_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -298,13 +298,226 @@ RSpec.describe "/books", type: :request do
                 id: 999999,
                 title: "Hacked Title"
               }
-            },
-            headers: valid_headers, as: :json
+            }.to_json,
+            headers: valid_headers
 
       book.reload
 
       expect(book.id).to eq(original_id)
       expect(book.title).to eq("Hacked Title")
+    end
+  end
+
+  describe "GET /books/search" do
+    before do
+      create(:book, title: "Ruby for Beginners", author: "Jane Smith", isbn: "9780123456789")
+      create(:book, title: "JavaScript Fundamentals", author: "Ruby Johnson", isbn: "9780987654321")
+      create(:book, title: "Python Programming", author: "John Doe", isbn: "9781234567ruby")
+      create(:book, title: "Data Science Guide", author: "Alice Brown", isbn: "9780555666777")
+    end
+
+    context "with valid search parameter" do
+      it "returns books matching title search" do
+        get "/books/search?q=JavaScript", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["title"]).to eq("JavaScript Fundamentals")
+        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["isbn"]).to eq("9780987654321")
+      end
+
+      it "returns books matching author search" do
+        get "/books/search?q=Smith", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["author"]).to eq("Jane Smith")
+        expect(book["title"]).to eq("Ruby for Beginners")
+        expect(book["isbn"]).to eq("9780123456789")
+      end
+
+      it "returns books matching ISBN search" do
+        get "/books/search?q=9780123456789", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["isbn"]).to eq("9780123456789")
+        expect(book["title"]).to eq("Ruby for Beginners")
+        expect(book["author"]).to eq("Jane Smith")
+      end
+
+      it "returns books matching partial ISBN search" do
+        get "/books/search?q=555666", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["isbn"]).to eq("9780555666777")
+        expect(book["title"]).to eq("Data Science Guide")
+        expect(book["author"]).to eq("Alice Brown")
+      end
+
+      it "performs case-insensitive search" do
+        get "/books/search?q=DAta", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+      end
+
+      it "returns partial matches" do
+        get "/books/search?q=Guide", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["title"]).to eq("Data Science Guide")
+        expect(book["author"]).to eq("Alice Brown")
+        expect(book["isbn"]).to eq("9780555666777")
+      end
+
+      it "strips surrounding double quotes from search query" do
+        get '/books/search?q="Python"', headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["title"]).to eq("Python Programming")
+        expect(book["author"]).to eq("John Doe")
+        expect(book["isbn"]).to eq("9781234567ruby")
+      end
+
+      it "strips surrounding single quotes from search query" do
+        get "/books/search?q='JavaScript'", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(1)
+
+        book = json_response.first
+        expect(book["title"]).to eq("JavaScript Fundamentals")
+        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["isbn"]).to eq("9780987654321")
+      end
+
+      it "returns empty array when no matches found" do
+        get "/books/search?q=Nonexistent Book", headers: valid_headers
+
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)).to eq([])
+      end
+
+      it "searches across multiple fields simultaneously" do
+        get "/books/search?q=ruby", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to eq(3)
+
+        # Extract the returned books' data for easier assertions
+        returned_titles = json_response.map { |book| book["title"] }
+        returned_authors = json_response.map { |book| book["author"] }
+        returned_isbns = json_response.map { |book| book["isbn"] }
+
+        expect(returned_titles).to include("Ruby for Beginners")        # "ruby" in title
+        expect(returned_authors).to include("Ruby Johnson")              # "ruby" in author
+        expect(returned_isbns).to include("9781234567ruby")             # "ruby" in ISBN
+
+        expect(returned_titles).to match_array([
+          "Ruby for Beginners",
+          "JavaScript Fundamentals",
+          "Python Programming"
+        ])
+      end
+    end
+
+    context "without search parameter" do
+      it "returns bad request error when q parameter is missing" do
+        get "/books/search", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("Search query parameter is required")
+      end
+
+      it "returns bad request error when q parameter is empty" do
+        get "/books/search?q=", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("Search query parameter is required")
+      end
+
+      it "returns bad request error when q parameter is only whitespace" do
+        get "/books/search?q=   ", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("Search query parameter is required")
+      end
+    end
+
+    context "response format" do
+      it "returns JSON content type" do
+        get "/books/search?q=JavaScript", headers: valid_headers
+
+        expect(response).to be_successful
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+
+      it "returns complete book objects with all attributes" do
+        get "/books/search?q=Ruby", headers: valid_headers
+
+        expect(response).to be_successful
+
+        json_response = JSON.parse(response.body)
+        book = json_response.first
+
+        expect(book).to have_key("id")
+        expect(book).to have_key("title")
+        expect(book).to have_key("author")
+        expect(book).to have_key("isbn")
+        expect(book).to have_key("published_date")
+        expect(book).to have_key("status")
+        expect(book).to have_key("created_at")
+        expect(book).to have_key("updated_at")
+      end
     end
   end
 end
