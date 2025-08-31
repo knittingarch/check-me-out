@@ -7,6 +7,28 @@ class Book < ApplicationRecord
   validates :published_date, presence: true
   validates :status, presence: true
 
+  # TODO: Determine how long the reservation can be held
+  def reserve
+    return false unless available?
+    update(status: :reserved, borrowed_until: nil)
+  end
+
+  # TODO: When authentication is introduced, make sure to tie reservation to a specific user
+  def borrow
+    return false unless available? || reserved?
+    update(status: :borrowed, borrowed_until: 1.week.from_now)
+  end
+
+  def return
+    return false unless borrowed?
+    update(status: :available, borrowed_until: nil)
+  end
+
+  def cancel_reservation
+    return false unless reserved?
+    update(status: :available, borrowed_until: nil)
+  end
+
   private
 
   def multiple_copies_allowed?
