@@ -50,109 +50,17 @@ class BooksController < ApplicationController
     @books = Book.all
 
     # FILTERS
+    return render_missing_filter_error unless params[:filter].present?
 
-    has_q_filter = false
+    @has_q_filter = apply_q_filter
 
-    unless params[:filter].present?
-      return render json: { error: "At least one search parameter is required" }, status: :bad_request
-    end
+    return if error_applying_title_filter?
+    return if error_applying_author_filter?
+    return if error_applying_isbn_filter?
+    return if error_applying_status_filter?
+    return if error_applying_borrowed_until_filter?
 
-    if params.dig(:filter, :q).present?
-      clean_query = params.dig(:filter, :q).gsub(/^["']|["']$/, '').strip
-
-      # Only apply the filter if there's actually content after cleaning
-      if clean_query.present?
-        @books = @books.where(
-          "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
-          "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
-        )
-        has_q_filter = true
-      end
-    end
-
-    # Filter by multiple titles
-    if params.dig(:filter, :title).present?
-      titles = params.dig(:filter, :title).split(',').map(&:strip).reject(&:blank?)
-
-      return unless validate_filter_count(titles, "title")
-
-      if titles.empty?
-        return render json: { error: "At least one search parameter is required" }, status: :bad_request
-      end
-
-      if titles.any?
-        title_conditions = titles.map { "title ILIKE ?" }.join(' OR ')
-        title_values = titles.map { |title| "%#{title}%" }
-        @books = @books.where(title_conditions, *title_values)
-      end
-    end
-
-    # Filter by multiple authors
-    if params.dig(:filter, :author).present?
-      authors = params.dig(:filter, :author).split(',').map(&:strip).reject(&:blank?)
-
-      if authors.empty?
-        return render json: { error: "At least one search parameter is required" }, status: :bad_request
-      end
-
-      return unless validate_filter_count(authors, "author")
-
-      if authors.any?
-        author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
-        author_values = authors.map { |author| "%#{author}%" }
-        @books = @books.where(author_conditions, *author_values)
-      end
-    end
-
-    # Filter by multiple ISBNS
-    if params.dig(:filter, :isbn).present?
-      isbns = params.dig(:filter, :isbn).split(',').map(&:strip).reject(&:blank?)
-
-      if isbns.empty?
-        return render json: { error: "At least one search parameter is required" }, status: :bad_request
-      end
-
-      return unless validate_filter_count(isbns, "ISBN")
-
-      if isbns.any?
-        isbn_conditions = isbns.map { "isbn ILIKE ?" }.join(' OR ')
-        isbn_values = isbns.map { |isbn| "%#{isbn}%" }
-        @books = @books.where(isbn_conditions, *isbn_values)
-      end
-    end
-
-    # Filter by Status
-    if params.dig(:filter, :status).present?
-      valid_statuses = ['available', 'borrowed', 'reserved']
-      if valid_statuses.include?(params.dig(:filter, :status))
-        @books = @books.where(status: params.dig(:filter, :status))
-      else
-        return render json: { error: "Invalid status. Must be: #{valid_statuses.join(', ')}" }, status: :bad_request
-      end
-    end
-
-    # Filter by Borrowed Until Date
-    if params.dig(:filter, :borrowed_until).present?
-      begin
-        borrowed_until_date = Date.parse(params.dig(:filter, :borrowed_until))
-
-        @books = @books.where("borrowed_until IS NULL OR borrowed_until <= ?", borrowed_until_date)
-      rescue ArgumentError
-        return render json: { error: "Invalid date format. Please use YYYY-MM-DD." }, status: :bad_request
-      end
-    end
-
-    # Check if any meaningful search criteria was provided
-    other_params = [:title, :author, :isbn, :status, :borrowed_until]
-    has_other_filters = other_params.any? { |param| params.dig(:filter, param).present? }
-
-    # Check if q parameter exists at all (even if empty/whitespace)
-    has_q_param = params[:filter] && params[:filter].key?(:q)
-
-    # Only return error if no filters at all AND no q parameter (even empty ones)
-    if !has_q_filter && !has_other_filters && !has_q_param
-      return render json: { error: "At least one search parameter is required" }, status: :bad_request
-    end
+    return unless validate_at_least_one_filter
 
     # SORTING
 
@@ -247,5 +155,139 @@ class BooksController < ApplicationController
 
     def bad_request
       render json: { error: 'Bad request' }, status: :bad_request
+    end
+
+    # Filter-related private methods
+    def render_missing_filter_error
+      render json: { error: "At least one search parameter is required" }, status: :bad_request
+    end
+
+    def apply_q_filter
+      return false unless params.dig(:filter, :q).present?
+
+      clean_query = params.dig(:filter, :q).gsub(/^["']|["']$/, '').strip
+
+      if clean_query.present?
+        @books = @books.where(
+          "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
+          "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
+        )
+        return true
+      end
+
+      false
+    end
+
+    def error_applying_title_filter?
+      return false unless params.dig(:filter, :title).present?
+
+      titles = params.dig(:filter, :title).split(',').map(&:strip).reject(&:blank?)
+
+      if titles.empty?
+        render_missing_filter_error
+        return true
+      end
+
+      unless validate_filter_count(titles, "title")
+        return true
+      end
+
+      if titles.any?
+        title_conditions = titles.map { "title ILIKE ?" }.join(' OR ')
+        title_values = titles.map { |title| "%#{title}%" }
+        @books = @books.where(title_conditions, *title_values)
+      end
+
+      false
+    end
+
+    def error_applying_author_filter?
+      return false unless params.dig(:filter, :author).present?
+
+      authors = params.dig(:filter, :author).split(',').map(&:strip).reject(&:blank?)
+
+      if authors.empty?
+        render_missing_filter_error
+        return true
+      end
+
+      unless validate_filter_count(authors, "author")
+        return true
+      end
+
+      if authors.any?
+        author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
+        author_values = authors.map { |author| "%#{author}%" }
+        @books = @books.where(author_conditions, *author_values)
+      end
+
+      false
+    end
+
+    def error_applying_isbn_filter?
+      return false unless params.dig(:filter, :isbn).present?
+
+      isbns = params.dig(:filter, :isbn).split(',').map(&:strip).reject(&:blank?)
+
+      if isbns.empty?
+        render_missing_filter_error
+        return true
+      end
+
+      unless validate_filter_count(isbns, "ISBN")
+        return true
+      end
+
+      if isbns.any?
+        isbn_conditions = isbns.map { "isbn ILIKE ?" }.join(' OR ')
+        isbn_values = isbns.map { |isbn| "%#{isbn}%" }
+        @books = @books.where(isbn_conditions, *isbn_values)
+      end
+
+      false
+    end
+
+    def error_applying_status_filter?
+      return false unless params.dig(:filter, :status).present?
+
+      valid_statuses = ['available', 'borrowed', 'reserved']
+      if valid_statuses.include?(params.dig(:filter, :status))
+        @books = @books.where(status: params.dig(:filter, :status))
+      else
+        render json: { error: "Invalid status. Must be: #{valid_statuses.join(', ')}" }, status: :bad_request
+        return true
+      end
+
+      false
+    end
+
+    def error_applying_borrowed_until_filter?
+      return false unless params.dig(:filter, :borrowed_until).present?
+
+      begin
+        borrowed_until_date = Date.parse(params.dig(:filter, :borrowed_until))
+        @books = @books.where("borrowed_until IS NULL OR borrowed_until <= ?", borrowed_until_date)
+      rescue ArgumentError
+        render json: { error: "Invalid date format. Please use YYYY-MM-DD." }, status: :bad_request
+        return true
+      end
+
+      false
+    end
+
+    def validate_at_least_one_filter
+      other_params = [:title, :author, :isbn, :status, :borrowed_until]
+      has_other_filters = other_params.any? { |param| params.dig(:filter, param).present? }
+
+      # Check if q parameter exists at all (even if empty/whitespace)
+      has_q_param = params[:filter] && params[:filter].key?(:q)
+
+      # Only return error if no filters at all AND no q parameter (even empty ones)
+      if !@has_q_filter && !has_other_filters && !has_q_param
+        render json: { error: "At least one search parameter is required" }, status: :bad_request
+        return false
+      end
+
+      true
     end
 end
