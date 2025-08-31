@@ -4,7 +4,7 @@ class BooksController < ApplicationController
   rescue_from ActionDispatch::Http::Parameters::ParseError, with: :bad_request
 
   # GET /books
-  # GET /books.json
+# GET /books.json
   def index
     @books = Book.all
 
@@ -44,6 +44,24 @@ class BooksController < ApplicationController
   def destroy
     @book.destroy
     head :no_content
+  end
+
+  def search
+    query = params[:q]
+
+    if query.present?
+      # Strip any surrounding quotes that might be included in the parameter
+      clean_query = query.gsub(/^["']|["']$/, '')
+
+      @books = Book.where(
+        "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
+        "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
+      )
+
+      render json: @books
+    else
+      render json: { error: "Search query parameter is required" }, status: :bad_request
+    end
   end
 
   private
