@@ -187,7 +187,41 @@ class BooksController < ApplicationController
       @books = @books.order(:title)
     end
 
-    render json: @books
+    # PAGINATION
+
+    page = params[:page].present? ? params[:page].to_i : 1
+    per_page = params[:per_page].present? ? params[:per_page].to_i : 20
+
+    # Validate pagination parameters
+    if page < 1
+      return render json: { error: "Page must be 1 or greater" }, status: :bad_request
+    end
+
+    if per_page < 1 || per_page > 100
+      return render json: { error: "Per page must be between 1 and 100" }, status: :bad_request
+    end
+
+    offset = (page - 1) * per_page
+    total_count = @books.count
+    @books = @books.limit(per_page).offset(offset)
+
+    # Calculate pagination metadata
+    total_pages = (total_count.to_f / per_page).ceil
+
+    # Prepare response with pagination metadata
+    response_data = {
+      books: @books,
+      pagination: {
+        current_page: page,
+        per_page: per_page,
+        total_count: total_count,
+        total_pages: total_pages,
+        has_next_page: page < total_pages,
+        has_previous_page: page > 1
+      }
+    }
+
+    render json: response_data
   end
 
   private
