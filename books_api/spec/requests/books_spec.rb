@@ -741,5 +741,151 @@ RSpec.describe "/books", type: :request do
         expect(json_response["error"]).to include("At least one search parameter is required")
       end
     end
+
+    context "with sorting" do
+      it "sorts books by title ascending by default" do
+        get "/books/search?filter[q]=", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to eq(titles.sort)
+      end
+
+      it "sorts books by title ascending when explicitly specified" do
+        get "/books/search?filter[q]=&sort=title", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to eq(titles.sort)
+      end
+
+      it "sorts books by title descending" do
+        get "/books/search?filter[q]=&sort=-title", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to eq(titles.sort.reverse)
+      end
+
+      it "sorts books by author ascending" do
+        get "/books/search?filter[q]=&sort=author", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        authors = json_response.map { |book| book["author"] }
+        expect(authors).to eq(authors.sort)
+      end
+
+      it "sorts books by author descending" do
+        get "/books/search?filter[q]=&sort=-author", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        authors = json_response.map { |book| book["author"] }
+        expect(authors).to eq(authors.sort.reverse)
+      end
+
+      it "sorts books by status" do
+        get "/books/search?filter[q]=&sort=status", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        statuses = json_response.map { |book| book["status"] }
+        # Available (0), borrowed (1), reserved (2)
+        expected_order = ["available", "available", "borrowed", "borrowed", "reserved"]
+        expect(statuses).to eq(expected_order)
+      end
+
+      it "sorts books by created_at descending" do
+        get "/books/search?filter[q]=&sort=-created_at", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        created_ats = json_response.map { |book| Time.parse(book["created_at"]) }
+        expect(created_ats).to eq(created_ats.sort.reverse)
+      end
+
+      it "sorts books by multiple fields" do
+        get "/books/search?filter[q]=&sort=status,title", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        # Group by status and check title ordering within each status
+        grouped = json_response.group_by { |book| book["status"] }
+        
+        # Available books should be sorted by title
+        if grouped["available"]
+          available_titles = grouped["available"].map { |book| book["title"] }
+          expect(available_titles).to eq(available_titles.sort)
+        end
+
+        # Borrowed books should be sorted by title
+        if grouped["borrowed"]
+          borrowed_titles = grouped["borrowed"].map { |book| book["title"] }
+          expect(borrowed_titles).to eq(borrowed_titles.sort)
+        end
+      end
+
+      it "sorts books by multiple fields with mixed directions" do
+        get "/books/search?filter[q]=&sort=status,-title", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        # Group by status and check title ordering within each status (desc this time)
+        grouped = json_response.group_by { |book| book["status"] }
+        
+        # Available books should be sorted by title descending
+        if grouped["available"]
+          available_titles = grouped["available"].map { |book| book["title"] }
+          expect(available_titles).to eq(available_titles.sort.reverse)
+        end
+
+        # Borrowed books should be sorted by title descending
+        if grouped["borrowed"]
+          borrowed_titles = grouped["borrowed"].map { |book| book["title"] }
+          expect(borrowed_titles).to eq(borrowed_titles.sort.reverse)
+        end
+      end
+
+      it "returns error for invalid sort field" do
+        get "/books/search?filter[q]=&sort=invalid_field", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Invalid sort field: invalid_field")
+        expect(json_response["error"]).to include("Valid fields are: title, author, isbn, published_date, status, borrowed_until, created_at, updated_at")
+      end
+
+      it "returns error for invalid sort field in multiple field sort" do
+        get "/books/search?filter[q]=&sort=title,invalid_field,author", headers: valid_headers
+
+        expect(response).to have_http_status(:bad_request)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to include("Invalid sort field: invalid_field")
+      end
+
+      it "sorts filtered results" do
+        get "/books/search?filter[q]=Ruby&sort=title", headers: valid_headers
+
+        expect(response).to be_successful
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.length).to be > 1
+        titles = json_response.map { |book| book["title"] }
+        expect(titles).to eq(titles.sort)
+      end
+    end
   end
 end

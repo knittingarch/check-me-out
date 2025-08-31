@@ -49,6 +49,8 @@ class BooksController < ApplicationController
   def search
     @books = Book.all
 
+    # FILTERS
+
     has_q_filter = false
 
     unless params[:filter].present?
@@ -72,7 +74,6 @@ class BooksController < ApplicationController
     if params.dig(:filter, :title).present?
       titles = params.dig(:filter, :title).split(',').map(&:strip).reject(&:blank?)
 
-      # Limit number of titles to prevent abuse
       return unless validate_filter_count(titles, "title")
 
       if titles.empty?
@@ -151,6 +152,39 @@ class BooksController < ApplicationController
     # Only return error if no filters at all AND no q parameter (even empty ones)
     if !has_q_filter && !has_other_filters && !has_q_param
       return render json: { error: "At least one search parameter is required" }, status: :bad_request
+    end
+
+    # SORTING
+
+    # Apply sorting if sort parameter is provided
+    if params[:sort].present?
+      sort_fields = params[:sort].split(',').map(&:strip)
+
+      # Validate each sort field
+      sort_criteria = []
+      sort_fields.each do |field|
+        direction = 'ASC'
+        column = field
+
+        # Handle descending order (prefix with -)
+        if field.start_with?('-')
+          direction = 'DESC'
+          column = field[1..]
+        end
+
+        # Validate column name
+        valid_columns = ['title', 'author', 'isbn', 'published_date', 'status', 'borrowed_until', 'created_at', 'updated_at']
+        unless valid_columns.include?(column)
+          return render json: { error: "Invalid sort field: #{column}. Valid fields are: #{valid_columns.join(', ')}" }, status: :bad_request
+        end
+
+        sort_criteria << "#{column} #{direction}"
+      end
+
+      @books = @books.order(sort_criteria.join(', '))
+    else
+      # Default sorting by title ASC
+      @books = @books.order(:title)
     end
 
     render json: @books
