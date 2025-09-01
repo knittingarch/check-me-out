@@ -13,6 +13,8 @@ class Book < ApplicationRecord
     authors.order(:name)
   end
 
+  # Reserves the book for one day only
+  # Returns false if the book has already been borrowed
   def reserve
     return false unless available?
 
