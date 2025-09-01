@@ -132,8 +132,14 @@ RSpec.configure do |config|
                 type: "array",
                 items: { type: "string" },
                 example: ["can't be blank"]
+              },
+              isbn: {
+                type: "array",
+                items: { type: "string" },
+                example: ["is invalid"]
               }
-            }
+            },
+            additionalProperties: false
           }
         }
       }
