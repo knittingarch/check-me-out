@@ -6,11 +6,11 @@ RSpec.describe Author, type: :model do
       author = create(:author_without_books)
 
       book1 = build(:book_without_authors)
-      book1.authors << author
+      book1.authors = [author]
       book1.save!
 
       book2 = build(:book_without_authors)
-      book2.authors << author
+      book2.authors = [author]
       book2.save!
 
       expect(author.books).to contain_exactly(book1, book2)

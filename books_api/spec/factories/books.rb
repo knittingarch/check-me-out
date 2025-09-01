@@ -7,7 +7,7 @@ FactoryBot.define do
     borrowed_until { nil }
 
     after(:build) do |book|
-      book.authors << build(:author_without_books)
+      book.authors = [build(:author_without_books)]
     end
 
     trait :borrowed do
