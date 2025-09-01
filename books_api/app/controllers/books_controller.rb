@@ -6,15 +6,26 @@ class BooksController < ApplicationController
   # GET /books
   # GET /books.json
   def index
-    @books = Book.all
+    @books = Book.includes(:authors).order(:id)
 
-    render json: @books
+    # Custom JSON with authors sorted by name
+    books_json = @books.map do |book|
+      book.as_json.merge(
+        'authors' => book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+      )
+    end
+
+    render json: books_json
   end
 
   # GET /books/1
   # GET /books/1.json
   def show
-    render json: @book
+    book_json = @book.as_json.merge(
+      'authors' => @book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+    )
+
+    render json: book_json
   end
 
   # POST /books
@@ -23,7 +34,7 @@ class BooksController < ApplicationController
     @book = Book.new(book_params)
 
     if @book.save
-      render json: @book, status: :created, location: @book
+      render json: @book, include: :authors, status: :created, location: @book
     else
       render json: @book.errors, status: :unprocessable_entity
     end
@@ -33,7 +44,7 @@ class BooksController < ApplicationController
   # PATCH/PUT /books/1.json
   def update
     if @book.update(book_params)
-      render json: @book, status: :ok
+      render json: @book, include: :authors, status: :ok
     else
       render json: @book.errors, status: :unprocessable_entity
     end
@@ -70,6 +81,9 @@ class BooksController < ApplicationController
 
       # Validate each sort field
       sort_criteria = []
+
+      needs_author_join = false
+
       sort_fields.each do |field|
         direction = 'ASC'
         column = field
@@ -86,12 +100,19 @@ class BooksController < ApplicationController
           return render json: { error: "Invalid sort field: #{column}. Valid fields are: #{valid_columns.join(', ')}" }, status: :bad_request
         end
 
-        sort_criteria << "#{column} #{direction}"
+        # Handle author sorting specially
+        if column == 'author'
+          # Use a subquery to get the first author name for each book for sorting
+          # This avoids the DISTINCT + ORDER BY issues with PostgreSQL
+          sort_criteria << Arel.sql("(SELECT authors.name FROM authors INNER JOIN authors_books ON authors.id = authors_books.author_id WHERE authors_books.book_id = books.id ORDER BY authors.name LIMIT 1) #{direction}")
+        else
+          sort_criteria << "#{column} #{direction}"
+        end
       end
 
-      @books = @books.order(sort_criteria.join(', '))
+      @books = @books.order(sort_criteria)
     else
-      # Default sorting by title ASC
+      # Default sorting by title ASC for search endpoint
       @books = @books.order(:title)
     end
 
@@ -113,12 +134,21 @@ class BooksController < ApplicationController
     total_count = @books.count
     @books = @books.limit(per_page).offset(offset)
 
+    # Eager load authors for JSON serialization to avoid N+1
+    @books = @books.includes(:authors)
+
     # Calculate pagination metadata
     total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil
 
     # Prepare response with pagination metadata
+    books_with_sorted_authors = @books.map do |book|
+      book.as_json.merge(
+        'authors' => book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+      )
+    end
+
     response_data = {
-      books: @books,
+      books: books_with_sorted_authors,
       pagination: {
         current_page: page,
         per_page: per_page,
@@ -138,7 +168,7 @@ class BooksController < ApplicationController
     end
 
     def book_params
-      params.require(:book).permit(:title, :author, :isbn, :published_date, :status, :borrowed_until)
+      params.require(:book).permit(:title, :isbn, :published_date, :status, :borrowed_until, author_ids: [])
     end
 
     def validate_filter_count(values, filter_type, max_count = 10)
@@ -168,10 +198,10 @@ class BooksController < ApplicationController
       clean_query = params.dig(:filter, :q).gsub(/^["']|["']$/, '').strip
 
       if clean_query.present?
-        @books = @books.where(
-          "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
+        @books = @books.joins(:authors).where(
+          "title ILIKE ? OR authors.name ILIKE ? OR isbn ILIKE ?",
           "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
-        )
+        ).distinct
         return true
       end
 
@@ -216,9 +246,9 @@ class BooksController < ApplicationController
       end
 
       if authors.any?
-        author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
+        author_conditions = authors.map { "authors.name ILIKE ?" }.join(' OR ')
         author_values = authors.map { |author| "%#{author}%" }
-        @books = @books.where(author_conditions, *author_values)
+        @books = @books.joins(:authors).where(author_conditions, *author_values).distinct
       end
 
       false

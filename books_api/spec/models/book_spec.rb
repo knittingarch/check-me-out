@@ -50,25 +50,18 @@ RSpec.describe Book, type: :model do
       end
     end
 
-    describe "author validation" do
-      it { should validate_presence_of(:author) }
+    describe "authors validation" do
+      it { should validate_presence_of(:authors) }
 
-      it "is invalid without an author" do
-        book = build(:book, author: nil)
-
-        expect(book).not_to be_valid
-        expect(book.errors[:author]).to include("can't be blank")
-      end
-
-      it "is invalid with an empty author" do
-        book = build(:book, author: "")
+      it "requires authors for validation" do
+        book = build(:book_without_authors)
 
         expect(book).not_to be_valid
-        expect(book.errors[:author]).to include("can't be blank")
+        expect(book.errors[:authors]).to include("can't be blank")
       end
 
-      it "is valid with an author" do
-        book = build(:book, author: "Valid Author")
+      it "is valid with authors" do
+        book = build(:book)
 
         expect(book).to be_valid
       end
@@ -217,31 +210,57 @@ RSpec.describe Book, type: :model do
   describe "ISBN uniqueness behavior" do
     describe "when creating different books" do
       it "validates ISBN uniqueness for different books" do
-        create(:book, title: "First Book", author: "First Author", isbn: "123456789")
-        duplicate_book = build(:book, title: "Second Book", author: "Second Author", isbn: "123456789")
+        author1 = create(:author_without_books, name: "Author One")
+        author2 = create(:author_without_books, name: "Author Two")
+
+        first_book = build(:book_without_authors, title: "First Book", isbn: "123456789")
+        first_book.authors = [author1]
+        first_book.save!
+
+        duplicate_book = build(:book_without_authors, title: "Second Book", isbn: "123456789")
+        duplicate_book.authors = [author2]
 
         expect(duplicate_book).not_to be_valid
         expect(duplicate_book.errors[:isbn]).to include("has already been taken")
       end
 
       it "allows same ISBN for same book (multiple copies)" do
-        create(:book, title: "Same Book", author: "Same Author", isbn: "123456789")
-        second_copy = build(:book, title: "Same Book", author: "Same Author", isbn: "123456789")
+        author = create(:author_without_books, name: "Same Author")
+
+        first_book = build(:book_without_authors, title: "Same Book", isbn: "123456789")
+        first_book.authors = [author]
+
+        second_copy = build(:book_without_authors, title: "Same Book", isbn: "123456789")
+        second_copy.authors = [author]
 
         expect(second_copy).to be_valid
       end
 
-      it "validates uniqueness when title differs but author and ISBN are same" do
-        create(:book, title: "Original Title", author: "Same Author", isbn: "123456789")
-        different_book = build(:book, title: "Different Title", author: "Same Author", isbn: "123456789")
+      it "validates uniqueness when title differs but ISBN is same" do
+        author1 = create(:author_without_books, name: "Author One")
+        author2 = create(:author_without_books, name: "Author Two")
+
+        first_book = build(:book_without_authors, title: "Original Title", isbn: "123456789")
+        first_book.authors = [author1]
+        first_book.save!
+
+        different_book = build(:book_without_authors, title: "Different Title", isbn: "123456789")
+        different_book.authors = [author2]
 
         expect(different_book).not_to be_valid
         expect(different_book.errors[:isbn]).to include("has already been taken")
       end
 
-      it "validates uniqueness when author differs but title and ISBN are same" do
-        create(:book, title: "Same Title", author: "Original Author", isbn: "123456789")
-        different_book = build(:book, title: "Same Title", author: "Different Author", isbn: "123456789")
+      it "validates uniqueness when authors differ but title and ISBN are same" do
+        author1 = create(:author_without_books, name: "Author One")
+        author2 = create(:author_without_books, name: "Author Two")
+
+        first_book = build(:book_without_authors, title: "Same Title", isbn: "123456789")
+        first_book.authors = [author1]
+        first_book.save!
+
+        different_book = build(:book_without_authors, title: "Same Title", isbn: "123456789")
+        different_book.authors = [author2]
 
         expect(different_book).not_to be_valid
         expect(different_book.errors[:isbn]).to include("has already been taken")
@@ -250,15 +269,26 @@ RSpec.describe Book, type: :model do
 
     describe "when updating existing books" do
       it "allows book to keep its own ISBN when updating other fields" do
-        book = create(:book, title: "Original Title", author: "Original Author", isbn: "123456789")
+        author = create(:author_without_books, name: "Test Author")
+        book = build(:book_without_authors, title: "Original Title", isbn: "123456789")
+        book.authors = [author]
+        book.save!
 
         book.title = "Updated Title"
         expect(book).to be_valid
       end
 
       it "prevents changing to an ISBN that belongs to a different book" do
-        create(:book, title: "Book One", author: "Author One", isbn: "111111111")
-        book2 = create(:book, title: "Book Two", author: "Author Two", isbn: "222222222")
+        author1 = create(:author_without_books, name: "Author One")
+        author2 = create(:author_without_books, name: "Author Two")
+
+        book1 = build(:book_without_authors, title: "Book One", isbn: "111111111")
+        book1.authors = [author1]
+        book1.save!
+
+        book2 = build(:book_without_authors, title: "Book Two", isbn: "222222222")
+        book2.authors = [author2]
+        book2.save!
 
         book2.isbn = "111111111"
         expect(book2).not_to be_valid

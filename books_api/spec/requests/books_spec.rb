@@ -1,10 +1,12 @@
 require "rails_helper"
 
 RSpec.describe "/books", type: :request do
+  let(:test_author) { create(:author_without_books, name: "Test Author") }
+
   let(:valid_attributes) do
     {
       title: "Test Book",
-      author: "Test Author",
+      author_ids: [test_author.id],
       isbn: "123456789123X",
       published_date: "2023-01-01",
       status: "available"
@@ -14,7 +16,7 @@ RSpec.describe "/books", type: :request do
   let(:invalid_attributes) do
     {
       title: "",
-      author: "",
+      author_ids: [],
       isbn: nil
     }
   end
@@ -65,7 +67,8 @@ RSpec.describe "/books", type: :request do
     end
 
     it "returns the correct book data" do
-      book = create(:book, title: "Specific Book", author: "Specific Author")
+      book = create(:book, title: "Specific Book")
+      book.authors.first.update(name: "Specific Author")
 
       get book_url(book), headers: valid_headers
 
@@ -74,7 +77,8 @@ RSpec.describe "/books", type: :request do
       json_response = JSON.parse(response.body)
 
       expect(json_response["title"]).to eq("Specific Book")
-      expect(json_response["author"]).to eq("Specific Author")
+      expect(json_response["authors"]).to be_an(Array)
+      expect(json_response["authors"].first["name"]).to eq("Specific Author")
       expect(json_response["id"]).to eq(book.id)
     end
 
@@ -107,11 +111,12 @@ RSpec.describe "/books", type: :request do
              params: { book: valid_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
+        created_book = Book.find(json_response["id"])
 
         expect(json_response["title"]).to eq("Test Book")
-        expect(json_response["author"]).to eq("Test Author")
-        expect(json_response["isbn"]).to eq("123456789123X")  # String, not integer
+        expect(json_response["isbn"]).to eq("123456789123X")
         expect(json_response["status"]).to eq("available")
+        expect(created_book.authors).to include(test_author)
       end
 
       it "sets the location header" do
@@ -127,10 +132,11 @@ RSpec.describe "/books", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
+      let(:updated_author) { create(:author_without_books, name: "Updated Author") }
       let(:new_attributes) do
         {
           title: "Updated Book Title",
-          author: "Updated Author"
+          author_ids: [updated_author.id]
         }
       end
 
@@ -142,7 +148,7 @@ RSpec.describe "/books", type: :request do
         book.reload
 
         expect(book.title).to eq("Updated Book Title")
-        expect(book.author).to eq("Updated Author")
+        expect(book.authors).to include(updated_author)
       end
 
       it "renders a JSON response with the book" do
@@ -162,9 +168,10 @@ RSpec.describe "/books", type: :request do
               params: { book: new_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
+        updated_book = Book.find(json_response["id"])
 
         expect(json_response["title"]).to eq("Updated Book Title")
-        expect(json_response["author"]).to eq("Updated Author")
+        expect(updated_book.authors).to include(updated_author)
       end
 
       it "updates book status" do
@@ -310,11 +317,33 @@ RSpec.describe "/books", type: :request do
 
   describe "GET /books/search" do
     before do
-      create(:book, title: "Ruby for Beginners", author: "Jane Smith", isbn: "9780123456789", status: "available")
-      create(:book, title: "JavaScript Fundamentals", author: "Ruby Johnson", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now)
-      create(:book, title: "Python Programming", author: "John Doe", isbn: "9781234567ruby", status: "reserved")
-      create(:book, title: "Data Science Guide", author: "Alice Brown", isbn: "9780555666777", status: "available")
-      create(:book, title: "Advanced Ruby", author: "Bob Wilson", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now)
+      # Create authors first
+      jane_smith = create(:author, name: "Jane Smith")
+      ruby_johnson = create(:author, name: "Ruby Johnson")
+      john_doe = create(:author, name: "John Doe")
+      alice_brown = create(:author, name: "Alice Brown")
+      bob_wilson = create(:author, name: "Bob Wilson")
+
+      # Create books with authors using build+save to avoid validation issues
+      book1 = build(:book_without_authors, title: "Ruby for Beginners", isbn: "9780123456789", status: "available")
+      book1.authors = [jane_smith]
+      book1.save!
+
+      book2 = build(:book_without_authors, title: "JavaScript Fundamentals", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now)
+      book2.authors = [ruby_johnson]
+      book2.save!
+
+      book3 = build(:book_without_authors, title: "Python Programming", isbn: "9781234567ruby", status: "reserved")
+      book3.authors = [john_doe]
+      book3.save!
+
+      book4 = build(:book_without_authors, title: "Data Science Guide", isbn: "9780555666777", status: "available")
+      book4.authors = [alice_brown]
+      book4.save!
+
+      book5 = build(:book_without_authors, title: "Advanced Ruby", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now)
+      book5.authors = [bob_wilson]
+      book5.save!
     end
 
     context "with valid search parameter" do
@@ -329,7 +358,7 @@ RSpec.describe "/books", type: :request do
 
         book = json_response["books"].first
         expect(book["title"]).to eq("JavaScript Fundamentals")
-        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["authors"].first["name"]).to eq("Ruby Johnson")
         expect(book["isbn"]).to eq("9780987654321")
       end
 
@@ -343,7 +372,7 @@ RSpec.describe "/books", type: :request do
         expect(json_response["books"].length).to eq(1)
 
         book = json_response["books"].first
-        expect(book["author"]).to eq("Jane Smith")
+        expect(book["authors"].first["name"]).to eq("Jane Smith")
         expect(book["title"]).to eq("Ruby for Beginners")
         expect(book["isbn"]).to eq("9780123456789")
       end
@@ -360,7 +389,7 @@ RSpec.describe "/books", type: :request do
         book = json_response["books"].first
         expect(book["isbn"]).to eq("9780123456789")
         expect(book["title"]).to eq("Ruby for Beginners")
-        expect(book["author"]).to eq("Jane Smith")
+        expect(book["authors"].first["name"]).to eq("Jane Smith")
       end
 
       it "returns books matching partial ISBN search" do
@@ -375,7 +404,7 @@ RSpec.describe "/books", type: :request do
         book = json_response["books"].first
         expect(book["isbn"]).to eq("9780555666777")
         expect(book["title"]).to eq("Data Science Guide")
-        expect(book["author"]).to eq("Alice Brown")
+        expect(book["authors"].first["name"]).to eq("Alice Brown")
       end
 
       it "performs case-insensitive search" do
@@ -398,7 +427,7 @@ RSpec.describe "/books", type: :request do
 
         book = json_response["books"].first
         expect(book["title"]).to eq("Data Science Guide")
-        expect(book["author"]).to eq("Alice Brown")
+        expect(book["authors"].first["name"]).to eq("Alice Brown")
         expect(book["isbn"]).to eq("9780555666777")
       end
 
@@ -413,7 +442,7 @@ RSpec.describe "/books", type: :request do
 
         book = json_response["books"].first
         expect(book["title"]).to eq("Python Programming")
-        expect(book["author"]).to eq("John Doe")
+        expect(book["authors"].first["name"]).to eq("John Doe")
         expect(book["isbn"]).to eq("9781234567ruby")
       end
 
@@ -428,7 +457,7 @@ RSpec.describe "/books", type: :request do
 
         book = json_response["books"].first
         expect(book["title"]).to eq("JavaScript Fundamentals")
-        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["authors"].first["name"]).to eq("Ruby Johnson")
         expect(book["isbn"]).to eq("9780987654321")
       end
 
@@ -450,7 +479,7 @@ RSpec.describe "/books", type: :request do
 
         # Extract the returned books' data for easier assertions
         returned_titles = json_response["books"].map { |book| book["title"] }
-        returned_authors = json_response["books"].map { |book| book["author"] }
+        returned_authors = json_response["books"].map { |book| book["authors"].first&.dig("name") }.compact
         returned_isbns = json_response["books"].map { |book| book["isbn"] }
 
         expect(returned_titles).to include("Ruby for Beginners", "Advanced Ruby")  # "ruby" in title
@@ -511,7 +540,7 @@ RSpec.describe "/books", type: :request do
 
         expect(book).to have_key("id")
         expect(book).to have_key("title")
-        expect(book).to have_key("author")
+        expect(book).to have_key("authors")
         expect(book).to have_key("isbn")
         expect(book).to have_key("published_date")
         expect(book).to have_key("status")
@@ -559,7 +588,7 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to eq(2)
-        authors = json_response["books"].map { |book| book["author"] }
+        authors = json_response["books"].map { |book| book["authors"].first["name"] }
         titles = json_response["books"].map { |book| book["title"] }
         expect(authors).to include("Jane Smith", "Bob Wilson")
         expect(titles).to include("Ruby for Beginners", "Advanced Ruby")
@@ -688,7 +717,7 @@ RSpec.describe "/books", type: :request do
 
         expect(json_response["books"].length).to eq(1)
         book = json_response["books"].first
-        expect(book["author"]).to eq("Ruby Johnson")
+        expect(book["authors"].first["name"]).to eq("Ruby Johnson")
         expect(book["status"]).to eq("borrowed")
       end
 
@@ -892,12 +921,10 @@ RSpec.describe "/books", type: :request do
       before do
         # Create additional books for pagination testing (we already have 5 from the main before block)
         6.upto(15) do |i|
-          create(:book,
-            title: "Book #{i.to_s.rjust(2, '0')}",
-            author: "Author #{i}",
-            isbn: "97801234567#{i.to_s.rjust(2, '0')}",
-            status: "available"
-          )
+          author = create(:author, name: "Author #{i}")
+          book = build(:book_without_authors, title: "Book #{i.to_s.rjust(2, '0')}", isbn: "97801234567#{i.to_s.rjust(2, '0')}", status: "available")
+          book.authors = [author]
+          book.save!
         end
       end
 
@@ -1146,7 +1173,7 @@ RSpec.describe "/books", type: :request do
 
           expect(book).to have_key("id")
           expect(book).to have_key("title")
-          expect(book).to have_key("author")
+          expect(book).to have_key("authors")
           expect(book).to have_key("isbn")
           expect(book).to have_key("published_date")
           expect(book).to have_key("status")
