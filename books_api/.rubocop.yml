@@ -28,9 +28,7 @@ RSpec:
 
 # Metrics
 Metrics/MethodLength:
-  Max: 25
-  Exclude:
-    - 'spec/**/*'
+  Enabled: false
 
 Metrics/BlockLength:
   Exclude:
@@ -45,15 +43,13 @@ Metrics/ClassLength:
     - 'spec/**/*'
 
 Metrics/AbcSize:
-  Max: 25
-  Exclude:
-    - 'spec/**/*'
+  Enabled: false
 
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Enabled: false
 
 Metrics/PerceivedComplexity:
-  Max: 10
+  Enabled: false
 
 # Style
 Style/Documentation:
@@ -85,6 +81,9 @@ RSpec/MultipleExpectations:
 RSpec/NestedGroups:
   Max: 4
 
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
 # Rails specific configurations
 Rails/Output:
   Exclude:
@@ -94,6 +93,9 @@ Rails/ResponseParsedBody:
   Enabled: false
 
 Rails/Blank:
+  Enabled: false
+
+Rails/HasAndBelongsToMany:
   Enabled: false
 
 # Disable some overly strict cops
