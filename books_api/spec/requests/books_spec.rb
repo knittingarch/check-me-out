@@ -325,20 +325,15 @@ RSpec.describe "/books", type: :request do
       bob_wilson = create(:author, name: "Bob Wilson")
 
       # Create books with the existing factory but override authors afterwards
-      book1 = create(:book, title: "Ruby for Beginners", isbn: "9780123456789", status: "available")
-      book1.authors = [jane_smith]
+      book1 = create(:book, title: "Ruby for Beginners", isbn: "9780123456789", status: "available", authors: [jane_smith])
 
-      book2 = create(:book, title: "JavaScript Fundamentals", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now)
-      book2.authors = [ruby_johnson]
+      book2 = create(:book, title: "JavaScript Fundamentals", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now, authors: [ruby_johnson])
 
-      book3 = create(:book, title: "Python Programming", isbn: "9781234567ruby", status: "reserved")
-      book3.authors = [john_doe]
+      book3 = create(:book, title: "Python Programming", isbn: "9781234567ruby", status: "reserved", authors: [john_doe])
 
-      book4 = create(:book, title: "Data Science Guide", isbn: "9780555666777", status: "available")
-      book4.authors = [alice_brown]
+      book4 = create(:book, title: "Data Science Guide", isbn: "9780555666777", status: "available", authors: [alice_brown])
 
-      book5 = create(:book, title: "Advanced Ruby", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now)
-      book5.authors = [bob_wilson]
+      book5 = create(:book, title: "Advanced Ruby", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now, authors: [bob_wilson])
     end
 
     context "with valid search parameter" do
