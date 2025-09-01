@@ -33,7 +33,7 @@ class BooksController < ApplicationController
   # PATCH/PUT /books/1.json
   def update
     if @book.update(book_params)
-      render json: @book, status: :ok
+      render json: @book, include: :authors, status: :ok
     else
       render json: @book.errors, status: :unprocessable_entity
     end
@@ -47,7 +47,7 @@ class BooksController < ApplicationController
   end
 
   def search
-    @books = Book.all
+    @books = Book.includes(:authors).all
 
     # FILTERS
     return render_missing_filter_error unless params[:filter].present?
@@ -70,6 +70,9 @@ class BooksController < ApplicationController
 
       # Validate each sort field
       sort_criteria = []
+      
+      needs_author_join = false
+
       sort_fields.each do |field|
         direction = 'ASC'
         column = field
@@ -86,7 +89,12 @@ class BooksController < ApplicationController
           return render json: { error: "Invalid sort field: #{column}. Valid fields are: #{valid_columns.join(', ')}" }, status: :bad_request
         end
 
-        sort_criteria << "#{column} #{direction}"
+        # Handle author sorting specially
+        if column == 'author'
+          sort_criteria << "authors.name #{direction}"
+        else
+          sort_criteria << "#{column} #{direction}"
+        end
       end
 
       @books = @books.order(sort_criteria.join(', '))
@@ -118,7 +126,7 @@ class BooksController < ApplicationController
 
     # Prepare response with pagination metadata
     response_data = {
-      books: @books,
+      books: @books.as_json(include: :authors),
       pagination: {
         current_page: page,
         per_page: per_page,
@@ -168,10 +176,10 @@ class BooksController < ApplicationController
       clean_query = params.dig(:filter, :q).gsub(/^["']|["']$/, '').strip
 
       if clean_query.present?
-        @books = @books.where(
-          "title ILIKE ? OR author ILIKE ? OR isbn ILIKE ?",
+        @books = @books.joins(:authors).where(
+          "title ILIKE ? OR authors.name ILIKE ? OR isbn ILIKE ?",
           "%#{clean_query}%", "%#{clean_query}%", "%#{clean_query}%"
-        )
+        ).distinct
         return true
       end
 
@@ -216,9 +224,9 @@ class BooksController < ApplicationController
       end
 
       if authors.any?
-        author_conditions = authors.map { "author ILIKE ?" }.join(' OR ')
+        author_conditions = authors.map { "authors.name ILIKE ?" }.join(' OR ')
         author_values = authors.map { |author| "%#{author}%" }
-        @books = @books.where(author_conditions, *author_values)
+        @books = @books.joins(:authors).where(author_conditions, *author_values).distinct
       end
 
       false
