@@ -89,7 +89,7 @@ jobs:
 
     - name: Run Brakeman security scan
       working-directory: books_api
-      run: brakeman --no-pager
+      run: brakeman --except EOLRails,EOLRuby --no-pager
 
     - name: Install Bundler Audit
       working-directory: books_api

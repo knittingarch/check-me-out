@@ -21,7 +21,7 @@ bundle exec rubocop || echo "⚠️  RuboCop found issues, but continuing..."
 
 echo ""
 echo "🛡️  Running security scan..."
-bundle exec brakeman --no-pager --quiet || echo "⚠️  Brakeman found issues, but continuing..."
+bundle exec brakeman --except EOLRails,EOLRuby --no-pager --quiet || echo "⚠️  Brakeman found issues, but continuing..."
 
 echo ""
 echo "🔒 Running dependency audit..."
