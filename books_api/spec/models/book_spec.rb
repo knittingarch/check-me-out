@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Book, type: :model do
   describe "enums" do
-    it { should define_enum_for(:status).with_values(available: 0, borrowed: 1, reserved: 2) }
+    it { is_expected.to define_enum_for(:status).with_values(available: 0, borrowed: 1, reserved: 2) }
   end
 
   describe "status behavior" do
@@ -27,7 +27,7 @@ RSpec.describe Book, type: :model do
 
   describe "validations" do
     describe "title validation" do
-      it { should validate_presence_of(:title) }
+      it { is_expected.to validate_presence_of(:title) }
 
       it "is invalid without a title" do
         book = build(:book, title: nil)
@@ -51,7 +51,7 @@ RSpec.describe Book, type: :model do
     end
 
     describe "authors validation" do
-      it { should validate_presence_of(:authors) }
+      it { is_expected.to validate_presence_of(:authors) }
 
       it "requires authors for validation" do
         book = build(:book_without_authors)
@@ -68,7 +68,7 @@ RSpec.describe Book, type: :model do
     end
 
     describe "ISBN validation" do
-      it { should validate_presence_of(:isbn) }
+      it { is_expected.to validate_presence_of(:isbn) }
 
       it "is invalid without an ISBN" do
         book = build(:book, isbn: nil)
@@ -86,7 +86,7 @@ RSpec.describe Book, type: :model do
     end
 
     describe "published_date validation" do
-      it { should validate_presence_of(:published_date) }
+      it { is_expected.to validate_presence_of(:published_date) }
 
       it "is invalid without a published_date" do
         book = build(:book, published_date: nil)
@@ -103,7 +103,7 @@ RSpec.describe Book, type: :model do
     end
 
     describe "status validation" do
-      it { should validate_presence_of(:status) }
+      it { is_expected.to validate_presence_of(:status) }
 
       it "is invalid without a status" do
         book = build(:book, status: nil)

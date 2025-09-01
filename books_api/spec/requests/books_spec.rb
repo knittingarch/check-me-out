@@ -83,7 +83,7 @@ RSpec.describe "/books", type: :request do
     end
 
     it "returns 404 for non-existent book" do
-      get book_url(id: 999999), headers: valid_headers
+      get book_url(id: 999_999), headers: valid_headers
 
       expect(response).to have_http_status(:not_found)
     end
@@ -92,10 +92,10 @@ RSpec.describe "/books", type: :request do
   describe "POST /create" do
     context "with valid parameters" do
       it "creates a new Book" do
-        expect {
+        expect do
           post books_url,
                params: { book: valid_attributes }.to_json, headers: valid_headers
-        }.to change(Book, :count).by(1)
+        end.to change(Book, :count).by(1)
       end
 
       it "renders a JSON response with the new book" do
@@ -199,7 +199,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "returns 404 for non-existent book" do
-        patch book_url(id: 999999),
+        patch book_url(id: 999_999),
               params: { book: { title: "Updated Title" } }.to_json, headers: valid_headers
 
         expect(response).to have_http_status(:not_found)
@@ -211,9 +211,9 @@ RSpec.describe "/books", type: :request do
     it "destroys the requested book" do
       book = create(:book)
 
-      expect {
+      expect do
         delete book_url(book), headers: valid_headers
-      }.to change(Book, :count).by(-1)
+      end.to change(Book, :count).by(-1)
     end
 
     it "returns no content status" do
@@ -225,7 +225,7 @@ RSpec.describe "/books", type: :request do
     end
 
     it "returns 404 for non-existent book" do
-      delete book_url(id: 999999), headers: valid_headers
+      delete book_url(id: 999_999), headers: valid_headers
 
       expect(response).to have_http_status(:not_found)
     end
@@ -259,7 +259,7 @@ RSpec.describe "/books", type: :request do
             params: {
               book: {
                 title: "New Title",
-                unpermitted_param: "should be ignored",
+                unpermitted_param: "should be ignored"
               }
             }.to_json,
             headers: valid_headers
@@ -302,7 +302,7 @@ RSpec.describe "/books", type: :request do
       patch book_url(book),
             params: {
               book: {
-                id: 999999,
+                id: 999_999,
                 title: "Hacked Title"
               }
             }.to_json,
@@ -484,14 +484,9 @@ RSpec.describe "/books", type: :request do
 
         expect(returned_titles).to include("Ruby for Beginners", "Advanced Ruby")  # "ruby" in title
         expect(returned_authors).to include("Ruby Johnson")                        # "ruby" in author
-        expect(returned_isbns).to include("9781234567ruby")                       # "ruby" in ISBN
+        expect(returned_isbns).to include("9781234567ruby") # "ruby" in ISBN
 
-        expect(returned_titles).to match_array([
-          "Ruby for Beginners",
-          "Advanced Ruby",
-          "JavaScript Fundamentals",
-          "Python Programming"
-        ])
+        expect(returned_titles).to contain_exactly("Ruby for Beginners", "Advanced Ruby", "JavaScript Fundamentals", "Python Programming")
       end
     end
 
@@ -571,7 +566,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "limits number of title filters" do
-        many_titles = Array.new(15, "Ruby").join(',')
+        many_titles = Array.new(15, "Ruby").join(",")
         get "/books/search?filter[title]=#{many_titles}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
@@ -595,7 +590,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "limits number of author filters" do
-        many_authors = Array.new(15, "Smith").join(',')
+        many_authors = Array.new(15, "Smith").join(",")
         get "/books/search?filter[author]=#{many_authors}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
@@ -619,7 +614,7 @@ RSpec.describe "/books", type: :request do
       end
 
       it "limits number of ISBN filters" do
-        many_isbns = Array.new(15, "123456789").join(',')
+        many_isbns = Array.new(15, "123456789").join(",")
         get "/books/search?filter[isbn]=#{many_isbns}", headers: valid_headers
 
         expect(response).to have_http_status(:bad_request)
@@ -830,7 +825,7 @@ RSpec.describe "/books", type: :request do
 
         statuses = json_response["books"].map { |book| book["status"] }
         # Available (0), borrowed (1), reserved (2)
-        expected_order = ["available", "available", "borrowed", "borrowed", "reserved"]
+        expected_order = %w[available available borrowed borrowed reserved]
         expect(statuses).to eq(expected_order)
       end
 
