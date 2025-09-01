@@ -4,8 +4,8 @@ namespace :books do
     puts "Starting expired books job at #{Time.current}"
 
     # Show what will be processed before running the job
-    overdue_books = Book.where(status: [:borrowed, :reserved])
-                       .where('borrowed_until < ?', Time.current)
+    overdue_books = Book.where(status: %i[borrowed reserved])
+                        .where(borrowed_until: ...Time.current)
 
     if overdue_books.any?
       puts "\nBooks to be expired:"
@@ -25,12 +25,12 @@ namespace :books do
   desc "Show overdue books and reservations (dry run)"
   task show_overdue: :environment do
     puts "=== OVERDUE BOOKS (BORROWED & RESERVED) ==="
-    overdue_books = Book.where(status: [:borrowed, :reserved])
-                       .where('borrowed_until < ?', Time.current)
+    overdue_books = Book.where(status: %i[borrowed reserved])
+                        .where(borrowed_until: ...Time.current)
 
     if overdue_books.any?
       overdue_books.each do |book|
-        status_text = book.status == 'borrowed' ? 'Due' : 'Reservation expires'
+        status_text = book.status == "borrowed" ? "Due" : "Reservation expired"
         puts "- #{book.title} (ID: #{book.id}) - Status: #{book.status.capitalize} - #{status_text}: #{book.borrowed_until}"
       end
       puts "\nTotal overdue books: #{overdue_books.count}"

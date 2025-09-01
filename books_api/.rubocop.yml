@@ -36,6 +36,7 @@ Metrics/BlockLength:
     - 'config/routes.rb'
     - 'config/environments/**/*'
     - 'db/seeds.rb'
+    - 'lib/tasks/**/*'
 
 Metrics/ClassLength:
   Max: 250
@@ -66,6 +67,7 @@ Layout/LineLength:
   Max: 120
   Exclude:
     - 'spec/**/*'
+    - 'lib/tasks/**/*'
 
 # Naming
 Naming/VariableNumber:

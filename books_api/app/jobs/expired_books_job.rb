@@ -16,8 +16,8 @@ class ExpiredBooksJob < ApplicationJob
 
   def expire_overdue_books
     # Find all borrowed or reserved books where borrowed_until has passed
-    overdue_books = Book.where(status: [:borrowed, :reserved])
-                       .where('borrowed_until < ?', Time.current)
+    overdue_books = Book.where(status: %i[borrowed reserved])
+                        .where(borrowed_until: ...Time.current)
     expired_count = 0
 
     overdue_books.find_each do |book|
