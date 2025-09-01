@@ -10,6 +10,7 @@ This API provides endpoints for managing books and authors in a library system. 
 
 - **Book Management**: Create, read, update, and delete books
 - **Author Management**: Books can have multiple authors
+- **Multiple Copies**: Support for multiple copies of the same book
 - **Search & Filter**: Search books by title, author, or ISBN
 - **Book Status**: Track availability (available, borrowed, reserved)
 - **Borrowing System**: Reserve and borrow books with due dates
@@ -109,19 +110,109 @@ curl "http://localhost:3001/books/search?filter[author]=Doe&sort=title"
 
 # Available books, sorted by publication date, page 2
 curl "http://localhost:3001/books/search?filter[status]=available&sort=-published_date&page=2"
+
+# Find available copies of a specific book by ISBN
+curl "http://localhost:3001/books/search?filter[isbn]=9781234567890&filter[status]=available"
+```
+
+### Example Response (Multiple Copies)
+
+When searching for books, you'll see multiple copies with the same ISBN but different copy numbers:
+
+```json
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "The Hobbit",
+      "isbn": "9780547928227",
+      "copy_number": 1,
+      "status": "available",
+      "borrowed_until": null,
+      "published_date": "1937-09-21",
+      "authors": [
+        {"id": 1, "name": "J.R.R. Tolkien"}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The Hobbit",
+      "isbn": "9780547928227",
+      "copy_number": 2,
+      "status": "borrowed",
+      "borrowed_until": "2025-09-08",
+      "published_date": "1937-09-21",
+      "authors": [
+        {"id": 1, "name": "J.R.R. Tolkien"}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The Hobbit",
+      "isbn": "9780547928227",
+      "copy_number": 3,
+      "status": "reserved",
+      "borrowed_until": "2025-09-02",
+      "published_date": "1937-09-21",
+      "authors": [
+        {"id": 1, "name": "J.R.R. Tolkien"}
+      ]
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "per_page": 20,
+    "total_pages": 1,
+    "total_count": 3
+  }
+}
 ```
 
 ## Models
 
 ### Book
 - Has many authors (many-to-many relationship)
-- Attributes: title, isbn, published_date, status, borrowed_until
+- Attributes: title, isbn, published_date, status, borrowed_until, copy_number
 - Status: available, borrowed, reserved
+- Copy System: Multiple copies of the same book share the same ISBN but have unique copy numbers
 - Methods: reserve, borrow, return, cancel_reservation
 
 ### Author
 - Has many books (many-to-many relationship)
 - Attributes: name
+
+## Multiple Copies System
+
+The API supports multiple copies of the same book with the following features:
+
+### Copy Management
+- **Unique Copy Numbers**: Each book instance has an automatically assigned `copy_number`
+- **Shared Metadata**: Books with the same ISBN share title, authors, and publication information
+- **Individual Status**: Each copy can have its own status (available, borrowed, reserved)
+- **Individual Due Dates**: Each copy can have different borrowing/return dates
+
+### How It Works
+1. **Automatic Copy Numbering**: When creating books with the same ISBN, copy numbers are automatically assigned (1, 2, 3, etc.)
+2. **Independent Tracking**: Each copy is tracked separately in the database
+3. **Search Results**: Search results include all copies, with copy numbers displayed
+4. **Availability**: The system can show which specific copies are available for borrowing
+
+### Database Implementation
+- Each book record represents one physical copy
+- Copy numbers are automatically generated based on existing books with the same ISBN
+- Books with the same ISBN will have copy_number values: 1, 2, 3, etc.
+
+### API Behavior
+- All endpoints work with individual copies (each copy has its own ID)
+- Search results will return all copies of matching books
+- Copy information is included in book responses
+- Filter by status to find available copies of popular books
+
+### Example Seed Data
+The seed file creates multiple copies of popular books to demonstrate this functionality:
+- Popular titles get 2-4 additional copies
+- Each copy has its own status (available, borrowed, or reserved)
+- Copy numbers are automatically assigned
 
 ## Testing
 
@@ -174,9 +265,15 @@ bundle exec bundle-audit
 ## Database Schema
 
 The application uses PostgreSQL with the following main tables:
-- `books` - Book records
+- `books` - Book records (each record represents one physical copy)
 - `authors` - Author records
 - `authors_books` - Join table for many-to-many relationship
+
+### Key Fields
+- `books.copy_number` - Automatically assigned number for books with the same ISBN
+- `books.isbn` - Shared identifier for all copies of the same book
+- `books.status` - Individual status per copy (available, borrowed, reserved)
+- `books.borrowed_until` - Individual due date per copy
 
 ## Background Jobs & Automation
 
