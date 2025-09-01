@@ -1,7 +1,7 @@
 class Book < ApplicationRecord
   has_and_belongs_to_many :authors
 
-  enum status: { available: 0, borrowed: 1, reserved: 2 }
+  enum :status, { available: 0, borrowed: 1, reserved: 2 }
 
   validates :title, presence: true
   validates :authors, presence: true

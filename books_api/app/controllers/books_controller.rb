@@ -63,7 +63,7 @@ class BooksController < ApplicationController
     # FILTERS
     return render_missing_filter_error unless params[:filter].present?
 
-    @has_q_filter = apply_q_filter
+    @has_q_filter = q_filter_applied?
 
     return if error_applying_title_filter?
     return if error_applying_author_filter?
@@ -71,7 +71,7 @@ class BooksController < ApplicationController
     return if error_applying_status_filter?
     return if error_applying_borrowed_until_filter?
 
-    return unless validate_at_least_one_filter
+    return unless at_least_one_filter_valid?
 
     # SORTING
 
@@ -104,7 +104,13 @@ class BooksController < ApplicationController
         if column == "author"
           # Use a subquery to get the first author name for each book for sorting
           # This avoids the DISTINCT + ORDER BY issues with PostgreSQL
-          sort_criteria << Arel.sql("(SELECT authors.name FROM authors INNER JOIN authors_books ON authors.id = authors_books.author_id WHERE authors_books.book_id = books.id ORDER BY authors.name LIMIT 1) #{direction}")
+          author_subquery = <<~SQL.squish
+            (SELECT authors.name FROM authors
+             INNER JOIN authors_books ON authors.id = authors_books.author_id
+             WHERE authors_books.book_id = books.id
+             ORDER BY authors.name LIMIT 1) #{direction}
+          SQL
+          sort_criteria << Arel.sql(author_subquery)
         else
           sort_criteria << "#{column} #{direction}"
         end
@@ -138,7 +144,7 @@ class BooksController < ApplicationController
     @books = @books.includes(:authors)
 
     # Calculate pagination metadata
-    total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil
+    total_pages = total_count.zero? ? 0 : (total_count.to_f / per_page).ceil
 
     # Prepare response with pagination metadata
     books_with_sorted_authors = @books.map do |book|
@@ -172,7 +178,7 @@ class BooksController < ApplicationController
     params.require(:book).permit(:title, :isbn, :published_date, :status, :borrowed_until, author_ids: [])
   end
 
-  def validate_filter_count(values, filter_type, max_count = 10)
+  def valid_filter_count?(values, filter_type, max_count = 10)
     if values.length > max_count
       render json: { error: "Too many #{filter_type} filters. Maximum #{max_count} allowed." }, status: :bad_request
       return false
@@ -193,7 +199,7 @@ class BooksController < ApplicationController
     render json: { error: "At least one search parameter is required" }, status: :bad_request
   end
 
-  def apply_q_filter
+  def q_filter_applied?
     return false unless params.dig(:filter, :q).present?
 
     clean_query = params.dig(:filter, :q).gsub(/^["']|["']$/, "").strip
@@ -212,14 +218,14 @@ class BooksController < ApplicationController
   def error_applying_title_filter?
     return false unless params.dig(:filter, :title).present?
 
-    titles = params.dig(:filter, :title).split(",").map(&:strip).reject(&:blank?)
+    titles = params.dig(:filter, :title).split(",").map(&:strip).compact_blank
 
     if titles.empty?
       render_missing_filter_error
       return true
     end
 
-    unless validate_filter_count(titles, "title")
+    unless valid_filter_count?(titles, "title")
       return true
     end
 
@@ -235,14 +241,14 @@ class BooksController < ApplicationController
   def error_applying_author_filter?
     return false unless params.dig(:filter, :author).present?
 
-    authors = params.dig(:filter, :author).split(",").map(&:strip).reject(&:blank?)
+    authors = params.dig(:filter, :author).split(",").map(&:strip).compact_blank
 
     if authors.empty?
       render_missing_filter_error
       return true
     end
 
-    unless validate_filter_count(authors, "author")
+    unless valid_filter_count?(authors, "author")
       return true
     end
 
@@ -258,14 +264,14 @@ class BooksController < ApplicationController
   def error_applying_isbn_filter?
     return false unless params.dig(:filter, :isbn).present?
 
-    isbns = params.dig(:filter, :isbn).split(",").map(&:strip).reject(&:blank?)
+    isbns = params.dig(:filter, :isbn).split(",").map(&:strip).compact_blank
 
     if isbns.empty?
       render_missing_filter_error
       return true
     end
 
-    unless validate_filter_count(isbns, "ISBN")
+    unless valid_filter_count?(isbns, "ISBN")
       return true
     end
 
@@ -306,12 +312,12 @@ class BooksController < ApplicationController
     false
   end
 
-  def validate_at_least_one_filter
+  def at_least_one_filter_valid?
     other_params = %i[title author isbn status borrowed_until]
     has_other_filters = other_params.any? { |param| params.dig(:filter, param).present? }
 
     # Check if q parameter exists at all (even if empty/whitespace)
-    has_q_param = params[:filter] && params[:filter].key?(:q)
+    has_q_param = params[:filter]&.key?(:q)
 
     # Only return error if no filters at all AND no q parameter (even empty ones)
     if !@has_q_filter && !has_other_filters && !has_q_param

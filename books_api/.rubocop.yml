@@ -77,18 +77,24 @@ Naming/VariableNumber:
 
 # RSpec specific configurations
 RSpec/ExampleLength:
-  Max: 10
+  Enabled: false
 
 RSpec/MultipleExpectations:
-  Max: 3
+  Enabled: false
 
 RSpec/NestedGroups:
   Max: 4
 
-# Rails specific configurations  
+# Rails specific configurations
 Rails/Output:
   Exclude:
     - 'db/seeds.rb'
+
+Rails/ResponseParsedBody:
+  Enabled: false
+
+Rails/Blank:
+  Enabled: false
 
 # Disable some overly strict cops
 Style/IfUnlessModifier:

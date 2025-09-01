@@ -50,7 +50,7 @@ RSpec.describe "/books", type: :request do
       expect(response).to be_successful
 
       json_response = JSON.parse(response.body)
-      titles = json_response.map { |book| book["title"] }
+      titles = json_response.pluck("title")
 
       expect(json_response.length).to eq(2)
       expect(titles).to include("Book 1", "Book 2")
@@ -478,9 +478,9 @@ RSpec.describe "/books", type: :request do
         expect(json_response["books"].length).to eq(4)
 
         # Extract the returned books' data for easier assertions
-        returned_titles = json_response["books"].map { |book| book["title"] }
+        returned_titles = json_response["books"].pluck("title")
         returned_authors = json_response["books"].map { |book| book["authors"].first&.dig("name") }.compact
-        returned_isbns = json_response["books"].map { |book| book["isbn"] }
+        returned_isbns = json_response["books"].pluck("isbn")
 
         expect(returned_titles).to include("Ruby for Beginners", "Advanced Ruby")  # "ruby" in title
         expect(returned_authors).to include("Ruby Johnson")                        # "ruby" in author
@@ -517,7 +517,7 @@ RSpec.describe "/books", type: :request do
       end
     end
 
-    context "response format" do
+    context "with response format" do
       it "returns JSON content type" do
         get "/books/search?filter[q]=JavaScript", headers: valid_headers
 
@@ -552,7 +552,7 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to eq(3)
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to include("Ruby for Beginners", "Advanced Ruby", "JavaScript Fundamentals")
       end
 
@@ -584,7 +584,7 @@ RSpec.describe "/books", type: :request do
 
         expect(json_response["books"].length).to eq(2)
         authors = json_response["books"].map { |book| book["authors"].first["name"] }
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(authors).to include("Jane Smith", "Bob Wilson")
         expect(titles).to include("Ruby for Beginners", "Advanced Ruby")
       end
@@ -607,8 +607,8 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to eq(2)
-        isbns = json_response["books"].map { |book| book["isbn"] }
-        titles = json_response["books"].map { |book| book["title"] }
+        isbns = json_response["books"].pluck("isbn")
+        titles = json_response["books"].pluck("title")
         expect(isbns).to include("9780123456789", "9780987654321")
         expect(titles).to include("Ruby for Beginners", "JavaScript Fundamentals")
       end
@@ -631,7 +631,7 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to eq(2) # Ruby for Beginners and Data Science Guide
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to include("Ruby for Beginners", "Data Science Guide")
         json_response["books"].each do |book|
           expect(book["status"]).to eq("available")
@@ -645,7 +645,7 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to eq(2) # JavaScript Fundamentals and Advanced Ruby
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to include("JavaScript Fundamentals", "Advanced Ruby")
         json_response["books"].each do |book|
           expect(book["status"]).to eq("borrowed")
@@ -676,7 +676,7 @@ RSpec.describe "/books", type: :request do
         # Should NOT find: JavaScript Fundamentals (returns in 1 week > 3 days)
         expect(json_response["books"].length).to eq(4)
 
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to include("Ruby for Beginners", "Data Science Guide", "Python Programming", "Advanced Ruby")
         expect(titles).not_to include("JavaScript Fundamentals")
       end
@@ -726,7 +726,7 @@ RSpec.describe "/books", type: :request do
         # and Advanced Ruby (title contains Ruby, status: borrowed)
         expect(json_response["books"].length).to eq(2)
 
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to include("JavaScript Fundamentals", "Advanced Ruby")
 
         json_response["books"].each do |book|
@@ -748,7 +748,7 @@ RSpec.describe "/books", type: :request do
       end
     end
 
-    context "enhanced error handling" do
+    context "with enhanced error handling" do
       it "requires at least one search parameter" do
         get "/books/search", headers: valid_headers
 
@@ -773,7 +773,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to eq(titles.sort)
       end
 
@@ -783,7 +783,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to eq(titles.sort)
       end
 
@@ -793,7 +793,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to eq(titles.sort.reverse)
       end
 
@@ -803,7 +803,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        authors = json_response["books"].map { |book| book["author"] }
+        authors = json_response["books"].pluck("author")
         expect(authors).to eq(authors.sort)
       end
 
@@ -813,7 +813,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        authors = json_response["books"].map { |book| book["author"] }
+        authors = json_response["books"].pluck("author")
         expect(authors).to eq(authors.sort.reverse)
       end
 
@@ -823,7 +823,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        statuses = json_response["books"].map { |book| book["status"] }
+        statuses = json_response["books"].pluck("status")
         # Available (0), borrowed (1), reserved (2)
         expected_order = %w[available available borrowed borrowed reserved]
         expect(statuses).to eq(expected_order)
@@ -835,7 +835,7 @@ RSpec.describe "/books", type: :request do
         expect(response).to be_successful
         json_response = JSON.parse(response.body)
 
-        created_ats = json_response["books"].map { |book| Time.parse(book["created_at"]) }
+        created_ats = json_response["books"].map { |book| Time.zone.parse(book["created_at"]) }
         expect(created_ats).to eq(created_ats.sort.reverse)
       end
 
@@ -850,13 +850,13 @@ RSpec.describe "/books", type: :request do
 
         # Available books should be sorted by title
         if grouped["available"]
-          available_titles = grouped["available"].map { |book| book["title"] }
+          available_titles = grouped["available"].pluck("title")
           expect(available_titles).to eq(available_titles.sort)
         end
 
         # Borrowed books should be sorted by title
         if grouped["borrowed"]
-          borrowed_titles = grouped["borrowed"].map { |book| book["title"] }
+          borrowed_titles = grouped["borrowed"].pluck("title")
           expect(borrowed_titles).to eq(borrowed_titles.sort)
         end
       end
@@ -872,13 +872,13 @@ RSpec.describe "/books", type: :request do
 
         # Available books should be sorted by title descending
         if grouped["available"]
-          available_titles = grouped["available"].map { |book| book["title"] }
+          available_titles = grouped["available"].pluck("title")
           expect(available_titles).to eq(available_titles.sort.reverse)
         end
 
         # Borrowed books should be sorted by title descending
         if grouped["borrowed"]
-          borrowed_titles = grouped["borrowed"].map { |book| book["title"] }
+          borrowed_titles = grouped["borrowed"].pluck("title")
           expect(borrowed_titles).to eq(borrowed_titles.sort.reverse)
         end
       end
@@ -907,7 +907,7 @@ RSpec.describe "/books", type: :request do
         json_response = JSON.parse(response.body)
 
         expect(json_response["books"].length).to be > 1
-        titles = json_response["books"].map { |book| book["title"] }
+        titles = json_response["books"].pluck("title")
         expect(titles).to eq(titles.sort)
       end
     end
@@ -1050,11 +1050,11 @@ RSpec.describe "/books", type: :request do
         expect(pagination["total_count"]).to eq(15)
 
         # Check that results are actually sorted descending by title
-        titles = books.map { |book| book["title"] }
+        titles = books.pluck("title")
         expect(titles).to eq(titles.sort.reverse)
       end
 
-      context "pagination parameter validation" do
+      context "with pagination parameter validation" do
         it "returns error for page less than 1" do
           get "/books/search?filter[q]=&page=0", headers: valid_headers
 
@@ -1105,7 +1105,7 @@ RSpec.describe "/books", type: :request do
         end
       end
 
-      context "pagination with no results" do
+      context "with pagination when no results" do
         it "returns correct pagination metadata when no books match filter" do
           get "/books/search?filter[q]=NonexistentBook&page=1&per_page=10", headers: valid_headers
 
@@ -1125,7 +1125,7 @@ RSpec.describe "/books", type: :request do
         end
       end
 
-      context "response format with pagination" do
+      context "with response format with pagination" do
         it "returns correct response structure" do
           get "/books/search?filter[q]=&page=1&per_page=5", headers: valid_headers
 
@@ -1177,7 +1177,7 @@ RSpec.describe "/books", type: :request do
         end
       end
 
-      context "edge cases" do
+      context "with edge cases" do
         it "handles non-integer page parameter gracefully" do
           get "/books/search?filter[q]=&page=abc", headers: valid_headers
 
@@ -1211,25 +1211,25 @@ RSpec.describe "/books", type: :request do
         end
       end
 
-      context "consistency across pages" do
+      context "with consistency across pages" do
         it "maintains consistent sorting and prevents duplicates across paginated results" do
           # Get first page
           get "/books/search?filter[q]=&sort=title&page=1&per_page=5", headers: valid_headers
           expect(response).to be_successful
           page1_response = JSON.parse(response.body)
-          page1_titles = page1_response["books"].map { |book| book["title"] }
+          page1_titles = page1_response["books"].pluck("title")
 
           # Get second page
           get "/books/search?filter[q]=&sort=title&page=2&per_page=5", headers: valid_headers
           expect(response).to be_successful
           page2_response = JSON.parse(response.body)
-          page2_titles = page2_response["books"].map { |book| book["title"] }
+          page2_titles = page2_response["books"].pluck("title")
 
           # Get third page
           get "/books/search?filter[q]=&sort=title&page=3&per_page=5", headers: valid_headers
           expect(response).to be_successful
           page3_response = JSON.parse(response.body)
-          page3_titles = page3_response["books"].map { |book| book["title"] }
+          page3_titles = page3_response["books"].pluck("title")
 
           all_titles = page1_titles + page2_titles + page3_titles
 
