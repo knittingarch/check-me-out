@@ -6,15 +6,26 @@ class BooksController < ApplicationController
   # GET /books
   # GET /books.json
   def index
-    @books = Book.includes(:authors).all
+    @books = Book.includes(:authors).order(:id)
 
-    render json: @books, include: :authors
+    # Custom JSON with authors sorted by name
+    books_json = @books.map do |book|
+      book.as_json.merge(
+        'authors' => book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+      )
+    end
+
+    render json: books_json
   end
 
   # GET /books/1
   # GET /books/1.json
   def show
-    render json: @book, include: :authors
+    book_json = @book.as_json.merge(
+      'authors' => @book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+    )
+
+    render json: book_json
   end
 
   # POST /books
@@ -70,7 +81,7 @@ class BooksController < ApplicationController
 
       # Validate each sort field
       sort_criteria = []
-      
+
       needs_author_join = false
 
       sort_fields.each do |field|
@@ -99,8 +110,8 @@ class BooksController < ApplicationController
 
       @books = @books.order(sort_criteria.join(', '))
     else
-      # Default sorting by title ASC
-      @books = @books.order(:title)
+      # Default sorting by ID ASC
+      @books = @books.order(:id)
     end
 
     # PAGINATION
@@ -125,8 +136,14 @@ class BooksController < ApplicationController
     total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil
 
     # Prepare response with pagination metadata
+    books_with_sorted_authors = @books.map do |book|
+      book.as_json.merge(
+        'authors' => book.authors_sorted_by_name.as_json(except: [:created_at, :updated_at])
+      )
+    end
+
     response_data = {
-      books: @books.as_json(include: :authors),
+      books: books_with_sorted_authors,
       pagination: {
         current_page: page,
         per_page: per_page,

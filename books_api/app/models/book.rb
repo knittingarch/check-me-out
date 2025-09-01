@@ -9,6 +9,10 @@ class Book < ApplicationRecord
   validates :published_date, presence: true
   validates :status, presence: true
 
+  def authors_sorted_by_name
+    authors.order(:name)
+  end
+
   # TODO: Determine how long the reservation can be held
   def reserve
     return false unless available?
