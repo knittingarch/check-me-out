@@ -13,22 +13,21 @@ class Book < ApplicationRecord
     authors.order(:name)
   end
 
-  # TODO: Determine how long the reservation can be held
   def reserve
     return false unless available?
 
-    update(status: :reserved, borrowed_until: nil)
+    update(status: :reserved, borrowed_until: 1.day.from_now)
   end
 
   # TODO: When authentication is introduced, make sure to tie reservation to a specific user
   def borrow
-    return false unless available? || reserved?
+    return false unless available?
 
     update(status: :borrowed, borrowed_until: 1.week.from_now)
   end
 
   def return
-    return false unless borrowed?
+    return false unless borrowed? || reserved?
 
     update(status: :available, borrowed_until: nil)
   end
