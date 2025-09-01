@@ -136,12 +136,12 @@ RSpec.describe Book, type: :model do
     let(:book) { create(:book, status: :available) }
 
     describe "#reserve" do
-      it "sets status to reserved and clears borrowed_until" do
+      it "sets status to reserved and updates borrowed_until" do
         result = book.reserve
 
         expect(result).to be true
         expect(book.status).to eq("reserved")
-        expect(book.borrowed_until).to be_nil
+        expect(book.borrowed_until).to be_present
       end
 
       it "cannot reserve a borrowed book" do
@@ -163,12 +163,13 @@ RSpec.describe Book, type: :model do
         expect(book.borrowed_until).to be_present
       end
 
-      it "can borrow a reserved book" do
-        book.update(status: :reserved, borrowed_until: nil)
+      it "cannot borrow a reserved book" do
+        book.update(status: :reserved, borrowed_until: 1.day.from_now)
 
-        book.borrow
+        result = book.borrow
 
-        expect(book.status).to eq("borrowed")
+        expect(result).to be false
+        expect(book.status).to eq("reserved")
         expect(book.borrowed_until).to be_present
       end
     end
@@ -184,19 +185,20 @@ RSpec.describe Book, type: :model do
         expect(book.borrowed_until).to be_nil
       end
 
-      it "cannot update status on a reserved book to available" do
-        book.update(status: :reserved, borrowed_until: nil)
+      it "can update status on a reserved book to available" do
+        book.update(status: :reserved)
 
         result = book.return
 
-        expect(result).to be false
-        expect(book.status).to eq("reserved")
+        expect(result).to be true
+        expect(book.status).to eq("available")
+        expect(book.borrowed_until).to be_nil
       end
     end
 
     describe "#cancel_reservation" do
       it "sets status to available and clears borrowed_until" do
-        book.update(status: :reserved, borrowed_until: nil)
+        book.update(status: :reserved)
 
         result = book.cancel_reservation
 

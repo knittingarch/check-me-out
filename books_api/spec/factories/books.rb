@@ -17,7 +17,7 @@ FactoryBot.define do
 
     trait :reserved do
       status { :reserved }
-      borrowed_until { nil }
+      borrowed_until { 1.day.from_now }
     end
   end
 
