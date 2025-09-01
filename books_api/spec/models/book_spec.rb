@@ -237,9 +237,9 @@ RSpec.describe Book, type: :model do
         second_copy.authors = [author]
 
         expect(second_copy).to be_valid
-        
+
         second_copy.save!
-        expect(second_copy.copy_number).to eq(2)        # Test a third copy
+        expect(second_copy.copy_number).to eq(2) # Test a third copy
         third_copy = build(:book_without_authors, title: "Same Book", isbn: "123456789")
         third_copy.authors = [author]
         third_copy.save!
