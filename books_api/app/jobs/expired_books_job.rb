@@ -7,6 +7,9 @@ class ExpiredBooksJob < ApplicationJob
     expired_count = expire_overdue_books
 
     Rails.logger.info "ExpiredBooksJob completed: #{expired_count} books expired"
+
+    # Return the count so rake tasks can use it
+    expired_count
   end
 
   private
