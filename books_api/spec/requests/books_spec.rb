@@ -324,16 +324,26 @@ RSpec.describe "/books", type: :request do
       alice_brown = create(:author, name: "Alice Brown")
       bob_wilson = create(:author, name: "Bob Wilson")
 
-      # Create books with the existing factory but override authors afterwards
-      book1 = create(:book, title: "Ruby for Beginners", isbn: "9780123456789", status: "available", authors: [jane_smith])
+      # Create books with authors using build+save to avoid validation issues
+      book1 = build(:book_without_authors, title: "Ruby for Beginners", isbn: "9780123456789", status: "available")
+      book1.authors = [jane_smith]
+      book1.save!
 
-      book2 = create(:book, title: "JavaScript Fundamentals", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now, authors: [ruby_johnson])
+      book2 = build(:book_without_authors, title: "JavaScript Fundamentals", isbn: "9780987654321", status: "borrowed", borrowed_until: 1.week.from_now)
+      book2.authors = [ruby_johnson]
+      book2.save!
 
-      book3 = create(:book, title: "Python Programming", isbn: "9781234567ruby", status: "reserved", authors: [john_doe])
+      book3 = build(:book_without_authors, title: "Python Programming", isbn: "9781234567ruby", status: "reserved")
+      book3.authors = [john_doe]
+      book3.save!
 
-      book4 = create(:book, title: "Data Science Guide", isbn: "9780555666777", status: "available", authors: [alice_brown])
+      book4 = build(:book_without_authors, title: "Data Science Guide", isbn: "9780555666777", status: "available")
+      book4.authors = [alice_brown]
+      book4.save!
 
-      book5 = create(:book, title: "Advanced Ruby", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now, authors: [bob_wilson])
+      book5 = build(:book_without_authors, title: "Advanced Ruby", isbn: "9781111222333", status: "borrowed", borrowed_until: 2.days.from_now)
+      book5.authors = [bob_wilson]
+      book5.save!
     end
 
     context "with valid search parameter" do
@@ -912,7 +922,9 @@ RSpec.describe "/books", type: :request do
         # Create additional books for pagination testing (we already have 5 from the main before block)
         6.upto(15) do |i|
           author = create(:author, name: "Author #{i}")
-          create(:book, title: "Book #{i.to_s.rjust(2, '0')}", isbn: "97801234567#{i.to_s.rjust(2, '0')}", status: "available", authors: [author])
+          book = build(:book_without_authors, title: "Book #{i.to_s.rjust(2, '0')}", isbn: "97801234567#{i.to_s.rjust(2, '0')}", status: "available")
+          book.authors = [author]
+          book.save!
         end
       end
 
