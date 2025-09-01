@@ -22,7 +22,7 @@ FactoryBot.define do
   end
 
   # Factory for creating books without automatic author associations
-  factory :book_without_authors, class: 'Book' do
+  factory :book_without_authors, class: "Book" do
     title { Faker::Book.title }
     isbn { Faker::Code.isbn }
     published_date { Faker::Date.between(from: 50.years.ago, to: Date.current) }

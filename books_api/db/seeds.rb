@@ -19,34 +19,31 @@ puts "Creating books with varied statuses..."
 # Create 5 available books
 5.times do
   # Decide which authors to associate
-  book_authors = []
-  if rand < 0.4  # 40% chance of having multiple authors
-    book_authors = authors.sample(rand(2..3))
-  else
-    book_authors = [authors.sample]
-  end
+  book_authors = if rand < 0.4 # 40% chance of having multiple authors
+                   authors.sample(rand(2..3))
+                 else
+                   [authors.sample]
+                 end
   FactoryBot.create(:book, authors: book_authors)
 end
 
 # Create 3 borrowed books using the :borrowed trait
 3.times do
-  book_authors = []
-  if rand < 0.3  # 30% chance of having multiple authors
-    book_authors = authors.sample(rand(2..3))
-  else
-    book_authors = [authors.sample]
-  end
+  book_authors = if rand < 0.3 # 30% chance of having multiple authors
+                   authors.sample(rand(2..3))
+                 else
+                   [authors.sample]
+                 end
   FactoryBot.create(:book, :borrowed, authors: book_authors)
 end
 
 # Create 2 reserved books using the :reserved trait
 2.times do
-  book_authors = []
-  if rand < 0.5  # 50% chance of having multiple authors
-    book_authors = authors.sample(rand(2..3))
-  else
-    book_authors = [authors.sample]
-  end
+  book_authors = if rand < 0.5 # 50% chance of having multiple authors
+                   authors.sample(rand(2..3))
+                 else
+                   [authors.sample]
+                 end
   FactoryBot.create(:book, :reserved, authors: book_authors)
 end
 

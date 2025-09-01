@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: books_api_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/books_api_test
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3.6
+        bundler-cache: true
+        working-directory: books_api
+
+    - name: Set up database
+      working-directory: books_api
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:migrate
+
+    - name: Run tests
+      working-directory: books_api
+      run: bundle exec rspec
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3.6
+        bundler-cache: true
+        working-directory: books_api
+
+    - name: Install RuboCop
+      working-directory: books_api
+      run: |
+        gem install rubocop rubocop-rails rubocop-rspec
+
+    - name: Run RuboCop
+      working-directory: books_api
+      run: rubocop
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3.6
+        bundler-cache: true
+        working-directory: books_api
+
+    - name: Install Brakeman
+      working-directory: books_api
+      run: gem install brakeman
+
+    - name: Run Brakeman security scan
+      working-directory: books_api
+      run: brakeman --except EOLRails,EOLRuby --no-pager
+
+    - name: Install Bundler Audit
+      working-directory: books_api
+      run: gem install bundler-audit
+
+    - name: Run Bundle Audit
+      working-directory: books_api
+      run: bundle audit --update

@@ -1,0 +1,107 @@
+# RuboCop configuration for Rails API
+# See https://docs.rubocop.org/rubocop/configuration.html
+
+AllCops:
+  TargetRubyVersion: 3.3
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'config/**/*'
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'node_modules/**/*'
+
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+
+# Rails specific cops
+Rails:
+  Enabled: true
+
+# RSpec specific cops
+RSpec:
+  Enabled: true
+
+# Metrics
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+    - 'config/environments/**/*'
+    - 'db/seeds.rb'
+
+Metrics/ClassLength:
+  Max: 250
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+# Style
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+# Layout
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'spec/**/*'
+
+# Naming
+Naming/VariableNumber:
+  Enabled: false
+
+# RSpec specific configurations
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+# Rails specific configurations
+Rails/Output:
+  Exclude:
+    - 'db/seeds.rb'
+
+Rails/ResponseParsedBody:
+  Enabled: false
+
+Rails/Blank:
+  Enabled: false
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+# Disable some overly strict cops
+Style/IfUnlessModifier:
+  Enabled: false
+
+Lint/UselessAssignment:
+  Exclude:
+    - 'spec/**/*'

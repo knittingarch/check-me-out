@@ -1,7 +1,7 @@
 class Book < ApplicationRecord
   has_and_belongs_to_many :authors
 
-  enum status: { available: 0, borrowed: 1, reserved: 2 }
+  enum :status, { available: 0, borrowed: 1, reserved: 2 }
 
   validates :title, presence: true
   validates :authors, presence: true
@@ -16,22 +16,26 @@ class Book < ApplicationRecord
   # TODO: Determine how long the reservation can be held
   def reserve
     return false unless available?
+
     update(status: :reserved, borrowed_until: nil)
   end
 
   # TODO: When authentication is introduced, make sure to tie reservation to a specific user
   def borrow
     return false unless available? || reserved?
+
     update(status: :borrowed, borrowed_until: 1.week.from_now)
   end
 
   def return
     return false unless borrowed?
+
     update(status: :available, borrowed_until: nil)
   end
 
   def cancel_reservation
     return false unless reserved?
+
     update(status: :available, borrowed_until: nil)
   end
 
@@ -42,19 +46,19 @@ class Book < ApplicationRecord
     # authors, AND isbn (the same book)
 
     current_author_ids = if persisted?
-      authors.pluck(:id).sort
-    else
-      # For unsaved records, get author IDs from the association
-      authors.map(&:id).compact.sort
-    end
+                           authors.pluck(:id).sort
+                         else
+                           # For unsaved records, get author IDs from the association
+                           authors.map(&:id).compact.sort
+                         end
 
     # Find books with same title/isbn that have the exact same set of authors
     # Use a more efficient database query instead of loading and iterating
     Book.joins(:authors)
         .where(title: title, isbn: isbn)
         .where.not(id: id)
-        .group('books.id')
-        .having('array_agg(authors.id ORDER BY authors.id) = ?', "{#{current_author_ids.join(',')}}")
+        .group("books.id")
+        .having("array_agg(authors.id ORDER BY authors.id) = ?", "{#{current_author_ids.join(',')}}")
         .exists?
   end
 end
