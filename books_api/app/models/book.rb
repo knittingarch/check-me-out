@@ -40,7 +40,6 @@ class Book < ApplicationRecord
   def multiple_copies_allowed?
     # Allow multiple copies if there's already a book with the same title,
     # authors, AND isbn (the same book)
-    existing_books = Book.where(title: title, isbn: isbn).where.not(id: id)
 
     current_author_ids = if persisted?
       authors.pluck(:id).sort
@@ -49,8 +48,13 @@ class Book < ApplicationRecord
       authors.map(&:id).compact.sort
     end
 
-    existing_books.any? do |existing_book|
-      existing_book.authors.pluck(:id).sort == current_author_ids
-    end
+    # Find books with same title/isbn that have the exact same set of authors
+    # Use a more efficient database query instead of loading and iterating
+    Book.joins(:authors)
+        .where(title: title, isbn: isbn)
+        .where.not(id: id)
+        .group('books.id')
+        .having('array_agg(authors.id ORDER BY authors.id) = ?', "{#{current_author_ids.join(',')}}")
+        .exists?
   end
 end
