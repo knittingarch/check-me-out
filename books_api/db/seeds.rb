@@ -6,50 +6,31 @@ puts "Clearing existing data..."
 Book.destroy_all
 Author.destroy_all
 
-# Create specific authors for testing
+# Create fictional authors for testing
 puts "Creating authors..."
-# Create some specific authors for testing
-famous_authors = [
-  "J.K. Rowling",
-  "Stephen King",
-  "Agatha Christie",
-  "George Orwell",
-  "Jane Austen",
-  "Ernest Hemingway",
-  "F. Scott Fitzgerald",
-  "Harper Lee",
-  "Mark Twain",
-  "Charles Dickens"
-]
+# Create some fictional authors using Faker
+authors = []
 
-authors = famous_authors.map do |name|
-  FactoryBot.create(:author_without_books, name: name)
-end
-
-# Create additional random authors
-5.times do
-  authors << FactoryBot.create(:author_without_books)
+15.times do
+  authors << FactoryBot.create(:author_without_books, name: Faker::Book.author)
 end
 
 puts "Creating books with specific titles for filter testing..."
 
 # Books with matching words for filter testing
+# Create test books with some matching titles for filter testing
+puts "Creating test books..."
 test_books = [
-  { title: "The Great Gatsby", isbn: "9780743273565", author_name: "F. Scott Fitzgerald" },
-  { title: "The Great Adventure", isbn: "9780123456789", author_name: nil },
-  { title: "Great Expectations", isbn: "9780141439563", author_name: "Charles Dickens" },
-  { title: "Harry Potter and the Philosopher's Stone", isbn: "9780747532699", author_name: "J.K. Rowling" },
-  { title: "Harry Potter and the Chamber of Secrets", isbn: "9780747538493", author_name: "J.K. Rowling" },
-  { title: "The Shining", isbn: "9780307743657", author_name: "Stephen King" },
-  { title: "It", isbn: "9781501142970", author_name: "Stephen King" },
-  { title: "Murder on the Orient Express", isbn: "9780062693662", author_name: "Agatha Christie" },
-  { title: "And Then There Were None", isbn: "9780062073488", author_name: "Agatha Christie" },
-  { title: "Pride and Prejudice", isbn: "9780141439518", author_name: "Jane Austen" },
-  { title: "1984", isbn: "9780451524935", author_name: "George Orwell" },
-  { title: "Animal Farm", isbn: "9780451526342", author_name: "George Orwell" },
-  { title: "To Kill a Mockingbird", isbn: "9780061120084", author_name: "Harper Lee" },
-  { title: "The Adventures of Tom Sawyer", isbn: "9780486400778", author_name: "Mark Twain" },
-  { title: "The Adventure Begins", isbn: "9780999888777", author_name: nil }
+  { title: "The Great #{Faker::Book.title}", isbn: Faker::Code.isbn },
+  { title: "Great #{Faker::Fantasy::Tolkien.location}", isbn: Faker::Code.isbn },
+  { title: "#{Faker::Book.title} Adventure", isbn: Faker::Code.isbn },
+  { title: "Adventure in #{Faker::Fantasy::Tolkien.location}", isbn: Faker::Code.isbn },
+  { title: "#{Faker::Book.title} Story", isbn: Faker::Code.isbn },
+  { title: "Story of #{Faker::Fantasy::Tolkien.character}", isbn: Faker::Code.isbn },
+  { title: "Magic #{Faker::Book.title}", isbn: Faker::Code.isbn },
+  { title: "The Magic #{Faker::Fantasy::Tolkien.race}", isbn: Faker::Code.isbn },
+  { title: "#{Faker::Book.title} Tales", isbn: Faker::Code.isbn },
+  { title: "Tales from #{Faker::Fantasy::Tolkien.location}", isbn: Faker::Code.isbn }
 ]
 
 # Create the test books with specific statuses
@@ -89,9 +70,9 @@ puts "Creating multiple copies of popular books..."
 
 # Create multiple copies of some popular books (same title, ISBN, and authors)
 popular_books = [
-  { title: "The Great Gatsby", isbn: "9780743273565", author_name: "F. Scott Fitzgerald" },
-  { title: "Harry Potter and the Philosopher's Stone", isbn: "9780747532699", author_name: "J.K. Rowling" },
-  { title: "1984", isbn: "9780451524935", author_name: "George Orwell" }
+  { title: "The #{Faker::Fantasy::Tolkien.character} Chronicles", isbn: Faker::Code.isbn, author_name: Faker::Book.author },
+  { title: "#{Faker::Book.title} and Beyond", isbn: Faker::Code.isbn, author_name: Faker::Book.author },
+  { title: "Secrets of #{Faker::Fantasy::Tolkien.location}", isbn: Faker::Code.isbn, author_name: Faker::Book.author }
 ]
 
 popular_books.each do |book_data|
