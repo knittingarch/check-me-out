@@ -1,0 +1,50 @@
+name: Mark PR Ready For Review
+
+# Created by Justin Kenyon (kenyonj@github.com)
+# Reference commit: https://github.com/github/education-web/commit/ff734a244aa69221582ccdaeff65d7a03fd3f07f
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - labeled
+      - unlabeled
+      - synchronize
+    branches:
+      - main
+
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: read
+  repository-projects: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wait_for_workflows:
+    name: Mark as ready after successful workflow suite
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'Mark Ready For Review') &&
+      github.event.pull_request.draft == true
+    steps:
+      - name: Wait for workflows
+        id: wait
+        run: gh pr checks ${{ github.event.pull_request.html_url }} --watch --required --fail-fast
+
+      - name: Mark as ready
+        if: |
+          contains(github.event.pull_request.labels.*.name, 'Mark Ready For Review') &&
+          github.event.pull_request.draft == true &&
+          steps.wait.outcome == 'success'
+        run: |
+          gh pr ready ${{ github.event.pull_request.html_url }} &&
+          gh pr edit ${{ github.event.pull_request.html_url }} --remove-label "Mark Ready For Review"
