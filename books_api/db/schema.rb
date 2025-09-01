@@ -34,7 +34,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_01_180605) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "copy_number", default: 1, null: false
-    t.index ["title", "isbn", "copy_number"], name: "index_books_on_title_isbn_copy_number", unique: true
   end
 
 end

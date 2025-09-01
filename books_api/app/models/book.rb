@@ -8,9 +8,30 @@ class Book < ApplicationRecord
   validates :isbn, presence: true, uniqueness: { unless: :multiple_copies_allowed? }
   validates :published_date, presence: true
   validates :status, presence: true
+  validates :copy_number, presence: true
+
+  before_create :set_copy_number_if_needed
 
   def authors_sorted_by_name
     authors.order(:name)
+  end
+
+  # Find the next copy number for a book with the same title, isbn, and authors
+  def self.next_copy_number_for(title:, isbn:, author_ids:)
+    author_ids = Array(author_ids).map(&:to_i).sort
+
+    return 1 if author_ids.empty?
+
+    # Find books with the same title, isbn, and authors, then get the max copy_number
+    matching_books = joins(:authors)
+                     .where(title: title, isbn: isbn)
+                     .group("books.id")
+                     .having("array_agg(authors.id ORDER BY authors.id) = ?", "{#{author_ids.join(',')}}")
+                     .pluck(:copy_number)
+
+    return 1 if matching_books.empty?
+
+    matching_books.max + 1
   end
 
   # Reserves the book for one day only
@@ -41,6 +62,22 @@ class Book < ApplicationRecord
   end
 
   private
+
+  def set_copy_number_if_needed
+    # Always auto-assign copy number if not set
+    return unless title.present? && isbn.present? && authors.any?
+
+    # Calculate the next copy number for books with same title, isbn, and authors
+    current_author_ids = authors.map(&:id).compact.sort
+    next_copy = self.class.next_copy_number_for(
+      title: title,
+      isbn: isbn,
+      author_ids: current_author_ids
+    )
+
+    # Always set the copy number to the calculated value
+    self.copy_number = next_copy
+  end
 
   def multiple_copies_allowed?
     # Allow multiple copies if there's already a book with the same title,
