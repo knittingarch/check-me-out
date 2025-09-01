@@ -58,7 +58,7 @@ class BooksController < ApplicationController
   end
 
   def search
-    @books = Book.includes(:authors).all
+    @books = Book.all
 
     # FILTERS
     return render_missing_filter_error unless params[:filter].present?
@@ -102,16 +102,18 @@ class BooksController < ApplicationController
 
         # Handle author sorting specially
         if column == 'author'
-          sort_criteria << "authors.name #{direction}"
+          # Use a subquery to get the first author name for each book for sorting
+          # This avoids the DISTINCT + ORDER BY issues with PostgreSQL
+          sort_criteria << Arel.sql("(SELECT authors.name FROM authors INNER JOIN authors_books ON authors.id = authors_books.author_id WHERE authors_books.book_id = books.id ORDER BY authors.name LIMIT 1) #{direction}")
         else
           sort_criteria << "#{column} #{direction}"
         end
       end
 
-      @books = @books.order(sort_criteria.join(', '))
+      @books = @books.order(sort_criteria)
     else
-      # Default sorting by ID ASC
-      @books = @books.order(:id)
+      # Default sorting by title ASC for search endpoint
+      @books = @books.order(:title)
     end
 
     # PAGINATION
@@ -131,6 +133,9 @@ class BooksController < ApplicationController
     offset = (page - 1) * per_page
     total_count = @books.count
     @books = @books.limit(per_page).offset(offset)
+
+    # Eager load authors for JSON serialization to avoid N+1
+    @books = @books.includes(:authors)
 
     # Calculate pagination metadata
     total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil
