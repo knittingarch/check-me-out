@@ -34,3 +34,6 @@
 
 # Ignore environment variables file
 .env
+
+# Ignore test coverage files
+/coverage/

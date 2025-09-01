@@ -231,11 +231,20 @@ RSpec.describe Book, type: :model do
 
         first_book = build(:book_without_authors, title: "Same Book", isbn: "123456789")
         first_book.authors = [author]
+        first_book.save!
 
         second_copy = build(:book_without_authors, title: "Same Book", isbn: "123456789")
         second_copy.authors = [author]
 
         expect(second_copy).to be_valid
+
+        second_copy.save!
+        expect(second_copy.copy_number).to eq(2)
+
+        third_copy = build(:book_without_authors, title: "Same Book", isbn: "123456789")
+        third_copy.authors = [author]
+        third_copy.save!
+        expect(third_copy.copy_number).to eq(3)
       end
 
       it "validates uniqueness when title differs but ISBN is same" do
@@ -296,6 +305,47 @@ RSpec.describe Book, type: :model do
         expect(book2).not_to be_valid
         expect(book2.errors[:isbn]).to include("has already been taken")
       end
+    end
+  end
+
+  describe "copy number management" do
+    it "automatically increments copy_number for duplicate books" do
+      author = create(:author_without_books, name: "Test Author")
+
+      # First copy
+      book1 = build(:book_without_authors, title: "Test Book", isbn: "111111111")
+      book1.authors = [author]
+      book1.save!
+      expect(book1.copy_number).to eq(1)
+
+      # Second copy
+      book2 = build(:book_without_authors, title: "Test Book", isbn: "111111111")
+      book2.authors = [author]
+      book2.save!
+      expect(book2.copy_number).to eq(2)
+
+      # Third copy
+      book3 = build(:book_without_authors, title: "Test Book", isbn: "111111111")
+      book3.authors = [author]
+      book3.save!
+      expect(book3.copy_number).to eq(3)
+    end
+
+    it "handles copy numbers correctly for books with multiple authors" do
+      author1 = create(:author_without_books, name: "Author One")
+      author2 = create(:author_without_books, name: "Author Two")
+
+      # First copy with two authors
+      book1 = build(:book_without_authors, title: "Multi-Author Book", isbn: "222222222")
+      book1.authors = [author1, author2]
+      book1.save!
+      expect(book1.copy_number).to eq(1)
+
+      # Second copy with same authors
+      book2 = build(:book_without_authors, title: "Multi-Author Book", isbn: "222222222")
+      book2.authors = [author1, author2]
+      book2.save!
+      expect(book2.copy_number).to eq(2)
     end
   end
 end

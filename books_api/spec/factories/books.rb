@@ -28,5 +28,6 @@ FactoryBot.define do
     published_date { Faker::Date.between(from: 50.years.ago, to: Date.current) }
     status { :available }
     borrowed_until { nil }
+    copy_number { 1 }
   end
 end
