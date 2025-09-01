@@ -10,7 +10,7 @@ class Book < ApplicationRecord
   validates :status, presence: true
   validates :copy_number, presence: true
 
-  before_create :set_copy_number_if_needed
+  before_create :set_copy_number
 
   def authors_sorted_by_name
     authors.order(:name)
@@ -63,8 +63,7 @@ class Book < ApplicationRecord
 
   private
 
-  def set_copy_number_if_needed
-    # Always auto-assign copy number if not set
+  def set_copy_number
     return unless title.present? && isbn.present? && authors.any?
 
     # Calculate the next copy number for books with same title, isbn, and authors
@@ -75,7 +74,6 @@ class Book < ApplicationRecord
       author_ids: current_author_ids
     )
 
-    # Always set the copy number to the calculated value
     self.copy_number = next_copy
   end
 
