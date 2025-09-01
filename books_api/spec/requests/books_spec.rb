@@ -1,10 +1,12 @@
 require "rails_helper"
 
 RSpec.describe "/books", type: :request do
+  let(:test_author) { create(:author_without_books, name: "Test Author") }
+
   let(:valid_attributes) do
     {
       title: "Test Book",
-      author: "Test Author",
+      author_ids: [test_author.id],
       isbn: "123456789123X",
       published_date: "2023-01-01",
       status: "available"
@@ -14,7 +16,7 @@ RSpec.describe "/books", type: :request do
   let(:invalid_attributes) do
     {
       title: "",
-      author: "",
+      author_ids: [],
       isbn: nil
     }
   end
@@ -107,11 +109,12 @@ RSpec.describe "/books", type: :request do
              params: { book: valid_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
+        created_book = Book.find(json_response["id"])
 
         expect(json_response["title"]).to eq("Test Book")
-        expect(json_response["author"]).to eq("Test Author")
-        expect(json_response["isbn"]).to eq("123456789123X")  # String, not integer
+        expect(json_response["isbn"]).to eq("123456789123X")
         expect(json_response["status"]).to eq("available")
+        expect(created_book.authors).to include(test_author)
       end
 
       it "sets the location header" do
@@ -127,10 +130,11 @@ RSpec.describe "/books", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
+      let(:updated_author) { create(:author_without_books, name: "Updated Author") }
       let(:new_attributes) do
         {
           title: "Updated Book Title",
-          author: "Updated Author"
+          author_ids: [updated_author.id]
         }
       end
 
@@ -142,7 +146,7 @@ RSpec.describe "/books", type: :request do
         book.reload
 
         expect(book.title).to eq("Updated Book Title")
-        expect(book.author).to eq("Updated Author")
+        expect(book.authors).to include(updated_author)
       end
 
       it "renders a JSON response with the book" do
@@ -162,9 +166,10 @@ RSpec.describe "/books", type: :request do
               params: { book: new_attributes }.to_json, headers: valid_headers
 
         json_response = JSON.parse(response.body)
+        updated_book = Book.find(json_response["id"])
 
         expect(json_response["title"]).to eq("Updated Book Title")
-        expect(json_response["author"]).to eq("Updated Author")
+        expect(updated_book.authors).to include(updated_author)
       end
 
       it "updates book status" do

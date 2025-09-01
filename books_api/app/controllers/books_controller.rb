@@ -6,15 +6,15 @@ class BooksController < ApplicationController
   # GET /books
   # GET /books.json
   def index
-    @books = Book.all
+    @books = Book.includes(:authors).all
 
-    render json: @books
+    render json: @books, include: :authors
   end
 
   # GET /books/1
   # GET /books/1.json
   def show
-    render json: @book
+    render json: @book, include: :authors
   end
 
   # POST /books
@@ -23,7 +23,7 @@ class BooksController < ApplicationController
     @book = Book.new(book_params)
 
     if @book.save
-      render json: @book, status: :created, location: @book
+      render json: @book, include: :authors, status: :created, location: @book
     else
       render json: @book.errors, status: :unprocessable_entity
     end
@@ -138,7 +138,7 @@ class BooksController < ApplicationController
     end
 
     def book_params
-      params.require(:book).permit(:title, :author, :isbn, :published_date, :status, :borrowed_until)
+      params.require(:book).permit(:title, :isbn, :published_date, :status, :borrowed_until, author_ids: [])
     end
 
     def validate_filter_count(values, filter_type, max_count = 10)
