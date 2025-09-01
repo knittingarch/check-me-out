@@ -912,8 +912,7 @@ RSpec.describe "/books", type: :request do
         # Create additional books for pagination testing (we already have 5 from the main before block)
         6.upto(15) do |i|
           author = create(:author, name: "Author #{i}")
-          book = create(:book, title: "Book #{i.to_s.rjust(2, '0')}", isbn: "97801234567#{i.to_s.rjust(2, '0')}", status: "available")
-          book.authors = [author]
+          create(:book, title: "Book #{i.to_s.rjust(2, '0')}", isbn: "97801234567#{i.to_s.rjust(2, '0')}", status: "available", authors: [author])
         end
       end
 
