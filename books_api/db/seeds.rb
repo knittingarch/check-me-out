@@ -70,7 +70,7 @@ puts "Creating multiple copies of popular books..."
 
 # Create multiple copies of some popular books (same title, ISBN, and authors)
 popular_books = [
-  { title: "The #{Faker::Fantasy::Tolkien.character} Chronicles", isbn: Faker::Code.isbn, author_name: Faker::Book.author },
+  { title: "The #{Faker::Fantasy::Tolkien.character} Chronicles", isbn: Faker::Code.isbn, author_name: Faker::Book.author }, # rubocop:disable Layout/LineLength
   { title: "#{Faker::Book.title} and Beyond", isbn: Faker::Code.isbn, author_name: Faker::Book.author },
   { title: "Secrets of #{Faker::Fantasy::Tolkien.location}", isbn: Faker::Code.isbn, author_name: Faker::Book.author }
 ]
