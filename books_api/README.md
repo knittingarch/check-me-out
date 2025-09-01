@@ -178,6 +178,155 @@ The application uses PostgreSQL with the following main tables:
 - `authors` - Author records
 - `authors_books` - Join table for many-to-many relationship
 
+## Background Jobs & Automation
+
+### Expired Books Job
+
+The application includes an automated job system to handle overdue books and reservations:
+
+#### ExpiredBooksJob
+
+**Purpose**: Automatically expires books that have reached the end of their borrowing/reservation period.
+
+**What it does**:
+- Finds all books with status `borrowed` or `reserved` where `borrowed_until` date has passed
+- Calls `book.return` on each overdue book to change status to `available`
+- Logs detailed information about the process
+- Returns the count of books that were expired
+
+**Implementation**:
+```ruby
+# Run the job immediately
+ExpiredBooksJob.perform_now
+
+# Queue the job for background processing
+ExpiredBooksJob.perform_later
+```
+
+### Rake Tasks
+
+Several rake tasks are available for managing expired books:
+
+#### books:expire_overdue
+Runs the ExpiredBooksJob and provides detailed output:
+```bash
+rails books:expire_overdue
+```
+
+**Output includes**:
+- List of books to be expired (before processing)
+- Job execution timestamps
+- Total count of books expired
+
+#### books:show_overdue
+Shows all currently overdue books and reservations (dry run):
+```bash
+rails books:show_overdue
+```
+
+**Output includes**:
+- All overdue borrowed books and reservations
+- Due dates and book details
+- Breakdown by status (borrowed vs reserved)
+
+#### books:create_expired_test_data
+Creates test data with overdue books for development/testing:
+```bash
+rails books:create_expired_test_data
+```
+
+**⚠️ Development only** - Creates sample overdue books for testing the expiration system.
+
+### Automated Scheduling
+
+#### Cron Job Setup
+
+The expired books job is configured to run automatically every day at 1:00 AM using a cron job.
+
+**Cron Configuration**:
+```bash
+0 1 * * * /path/to/expire_books_cron.sh >> /path/to/expired_books_cron.log 2>&1
+```
+
+**Shell Script** (`expire_books_cron.sh`):
+```bash
+#!/bin/bash
+
+# Set PATH to include your Ruby installation
+export PATH="/path/to/ruby/bin:$PATH"
+
+# Change to the Rails app directory
+cd /path/to/your/books_api
+
+# Run the expired books job
+bundle exec rails books:expire_overdue RAILS_ENV=production
+```
+
+#### Monitoring
+
+**Check cron job logs**:
+```bash
+# View recent cron job output
+cat /path/to/expired_books_cron.log
+
+# View last 10 lines
+tail /path/to/expired_books_cron.log
+
+# Monitor live (follow new entries)
+tail -f /path/to/expired_books_cron.log
+```
+
+**Verify cron job is scheduled**:
+```bash
+crontab -l
+```
+
+**Test the job manually**:
+```bash
+# Run the shell script directly
+./expire_books_cron.sh
+
+# Or run the rake task
+rails books:expire_overdue
+```
+
+#### Job Workflow
+
+1. **Daily at 1:00 AM**: Cron triggers the shell script
+2. **Environment Setup**: Script sets up Ruby/Rails environment
+3. **Job Execution**: ExpiredBooksJob processes overdue books
+4. **Logging**: Results are logged to both Rails logs and cron log file
+5. **Completion**: Books are returned to available status
+
+**Example Log Output**:
+```
+Starting expired books job at 2025-09-01 16:40:05 UTC
+
+Books to be expired:
+- I Sing the Body Electric (ID: 29) - Status: Borrowed
+- A Swiftly Tilting Planet (ID: 30) - Status: Reserved
+
+Expired books job completed at 2025-09-01 16:40:05 UTC
+Total books expired: 2
+```
+
+### Development & Testing
+
+**Create test scenario**:
+```bash
+# Create overdue books
+rails books:create_expired_test_data
+
+# Check what would be expired
+rails books:show_overdue
+
+# Run the expiration job
+rails books:expire_overdue
+
+# Verify no overdue books remain
+rails books:show_overdue
+```
+
 ## Contributing
 
 1. Run tests: `bundle exec rspec`
