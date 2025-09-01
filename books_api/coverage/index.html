@@ -13,7 +13,7 @@
       <img src="./assets/0.13.2/loading.gif" alt="loading"/>
     </div>
     <div id="wrapper" class="hide">
-      <div class="timestamp">Generated <abbr class="timeago" title="2025-09-01T07:56:11-05:00">2025-09-01T07:56:11-05:00</abbr></div>
+      <div class="timestamp">Generated <abbr class="timeago" title="2025-09-01T08:34:43-05:00">2025-09-01T08:34:43-05:00</abbr></div>
       <ul class="group_tabs"></ul>
 
       <div id="content">
@@ -22,14 +22,14 @@
     <span class="group_name">All Files</span>
     (<span class="covered_percent">
       <span class="yellow">
-  88.44%
+  88.5%
 </span>
 
      </span>
      covered at
      <span class="covered_strength">
        <span class="green">
-         25.58
+         25.47
        </span>
     </span> hits/line
     )
@@ -42,11 +42,11 @@
   </div>
 
   <div class="t-line-summary">
-    <b>199</b> relevant lines,
-    <span class="green"><b>176</b> lines covered</span> and
+    <b>200</b> relevant lines,
+    <span class="green"><b>177</b> lines covered</span> and
     <span class="red"><b>23</b> lines missed. </span>
     (<span class="yellow">
-  88.44%
+  88.5%
 </span>
 )
   </div>
@@ -104,12 +104,12 @@
         
           <tr class="t-file">
             <td class="strong t-file__name"><a href="#12850100c027cbf83dd31730fdebb020e8c67b6d" class="src_link" title="app/controllers/books_controller.rb">app/controllers/books_controller.rb</a></td>
-            <td class="green strong cell--number t-file__coverage">94.04 %</td>
-            <td class="cell--number">324</td>
-            <td class="cell--number">151</td>
-            <td class="cell--number">142</td>
+            <td class="green strong cell--number t-file__coverage">94.08 %</td>
+            <td class="cell--number">330</td>
+            <td class="cell--number">152</td>
+            <td class="cell--number">143</td>
             <td class="cell--number">9</td>
-            <td class="cell--number">19.92</td>
+            <td class="cell--number">19.80</td>
             
           </tr>
         
@@ -180,14 +180,14 @@
     <span class="group_name">Controllers</span>
     (<span class="covered_percent">
       <span class="green">
-  94.08%
+  94.12%
 </span>
 
      </span>
      covered at
      <span class="covered_strength">
        <span class="green">
-         19.8
+         19.68
        </span>
     </span> hits/line
     )
@@ -200,11 +200,11 @@
   </div>
 
   <div class="t-line-summary">
-    <b>152</b> relevant lines,
-    <span class="green"><b>143</b> lines covered</span> and
+    <b>153</b> relevant lines,
+    <span class="green"><b>144</b> lines covered</span> and
     <span class="red"><b>9</b> lines missed. </span>
     (<span class="green">
-  94.08%
+  94.12%
 </span>
 )
   </div>
@@ -240,12 +240,12 @@
         
           <tr class="t-file">
             <td class="strong t-file__name"><a href="#12850100c027cbf83dd31730fdebb020e8c67b6d" class="src_link" title="app/controllers/books_controller.rb">app/controllers/books_controller.rb</a></td>
-            <td class="green strong cell--number t-file__coverage">94.04 %</td>
-            <td class="cell--number">324</td>
-            <td class="cell--number">151</td>
-            <td class="cell--number">142</td>
+            <td class="green strong cell--number t-file__coverage">94.08 %</td>
+            <td class="cell--number">330</td>
+            <td class="cell--number">152</td>
+            <td class="cell--number">143</td>
             <td class="cell--number">9</td>
-            <td class="cell--number">19.92</td>
+            <td class="cell--number">19.80</td>
             
           </tr>
         
@@ -890,7 +890,7 @@
     <h3>app/controllers/books_controller.rb</h3>
     <h4>
       <span class="green">
-  94.04%
+  94.08%
 </span>
 
       lines covered
@@ -899,8 +899,8 @@
     
 
     <div class="t-line-summary">
-      <b>151</b> relevant lines.
-      <span class="green"><b>142</b> lines covered</span> and
+      <b>152</b> relevant lines.
+      <span class="green"><b>143</b> lines covered</span> and
       <span class="red"><b>9</b> lines missed.</span>
     </div>
 
@@ -1619,7 +1619,7 @@
 
             
 
-            <code class="ruby">    @has_q_filter = apply_q_filter</code>
+            <code class="ruby">    @has_q_filter = q_filter_applied?</code>
           </li>
         </div>
       
@@ -1711,7 +1711,7 @@
 
             
 
-            <code class="ruby">    return unless validate_at_least_one_filter</code>
+            <code class="ruby">    return unless at_least_one_filter_valid?</code>
           </li>
         </div>
       
@@ -2069,7 +2069,7 @@
 
             
 
-            <code class="ruby">          sort_criteria &lt;&lt; Arel.sql(&quot;(SELECT authors.name FROM authors INNER JOIN authors_books ON authors.id = authors_books.author_id WHERE authors_books.book_id = books.id ORDER BY authors.name LIMIT 1) #{direction}&quot;)</code>
+            <code class="ruby">          author_subquery = &lt;&lt;~SQL.squish</code>
           </li>
         </div>
       
@@ -2079,12 +2079,74 @@
 
             
 
+            <code class="ruby">            (SELECT authors.name FROM authors</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="109">
+            
+
+            
+
+            <code class="ruby">             INNER JOIN authors_books ON authors.id = authors_books.author_id</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="110">
+            
+
+            
+
+            <code class="ruby">             WHERE authors_books.book_id = books.id</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="111">
+            
+
+            
+
+            <code class="ruby">             ORDER BY authors.name LIMIT 1) #{direction}</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="112">
+            
+
+            
+
+            <code class="ruby">          SQL</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="2" data-linenumber="113">
+            
+              <span class="hits">2</span>
+            
+
+            
+
+            <code class="ruby">          sort_criteria &lt;&lt; Arel.sql(author_subquery)</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="114">
+            
+
+            
+
             <code class="ruby">        else</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="14" data-linenumber="109">
+          <li class="covered" data-hits="14" data-linenumber="115">
             
               <span class="hits">14</span>
             
@@ -2096,7 +2158,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="110">
+          <li class="never" data-hits="" data-linenumber="116">
             
 
             
@@ -2106,76 +2168,12 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="111">
-            
-
-            
-
-            <code class="ruby">      end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="112">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="13" data-linenumber="113">
-            
-              <span class="hits">13</span>
-            
-
-            
-
-            <code class="ruby">      @books = @books.order(sort_criteria)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="114">
-            
-
-            
-
-            <code class="ruby">    else</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="115">
-            
-
-            
-
-            <code class="ruby">      # Default sorting by title ASC for search endpoint</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="45" data-linenumber="116">
-            
-              <span class="hits">45</span>
-            
-
-            
-
-            <code class="ruby">      @books = @books.order(:title)</code>
-          </li>
-        </div>
-      
-        <div>
           <li class="never" data-hits="" data-linenumber="117">
             
 
             
 
-            <code class="ruby">    end</code>
+            <code class="ruby">      end</code>
           </li>
         </div>
       
@@ -2190,12 +2188,14 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="119">
+          <li class="covered" data-hits="13" data-linenumber="119">
+            
+              <span class="hits">13</span>
             
 
             
 
-            <code class="ruby">    # PAGINATION</code>
+            <code class="ruby">      @books = @books.order(sort_criteria)</code>
           </li>
         </div>
       
@@ -2205,12 +2205,74 @@
 
             
 
+            <code class="ruby">    else</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="121">
+            
+
+            
+
+            <code class="ruby">      # Default sorting by title ASC for search endpoint</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="45" data-linenumber="122">
+            
+              <span class="hits">45</span>
+            
+
+            
+
+            <code class="ruby">      @books = @books.order(:title)</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="123">
+            
+
+            
+
+            <code class="ruby">    end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="124">
+            
+
+            
+
             <code class="ruby"></code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="58" data-linenumber="121">
+          <li class="never" data-hits="" data-linenumber="125">
+            
+
+            
+
+            <code class="ruby">    # PAGINATION</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="126">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="58" data-linenumber="127">
             
               <span class="hits">58</span>
             
@@ -2222,7 +2284,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="58" data-linenumber="122">
+          <li class="covered" data-hits="58" data-linenumber="128">
             
               <span class="hits">58</span>
             
@@ -2234,7 +2296,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="123">
+          <li class="never" data-hits="" data-linenumber="129">
             
 
             
@@ -2244,7 +2306,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="124">
+          <li class="never" data-hits="" data-linenumber="130">
             
 
             
@@ -2254,7 +2316,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="58" data-linenumber="125">
+          <li class="covered" data-hits="58" data-linenumber="131">
             
               <span class="hits">58</span>
             
@@ -2266,7 +2328,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="126">
+          <li class="covered" data-hits="3" data-linenumber="132">
             
               <span class="hits">3</span>
             
@@ -2278,7 +2340,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="127">
+          <li class="never" data-hits="" data-linenumber="133">
             
 
             
@@ -2288,7 +2350,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="128">
+          <li class="never" data-hits="" data-linenumber="134">
             
 
             
@@ -2298,7 +2360,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="55" data-linenumber="129">
+          <li class="covered" data-hits="55" data-linenumber="135">
             
               <span class="hits">55</span>
             
@@ -2310,7 +2372,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="130">
+          <li class="covered" data-hits="3" data-linenumber="136">
             
               <span class="hits">3</span>
             
@@ -2322,7 +2384,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="131">
+          <li class="never" data-hits="" data-linenumber="137">
             
 
             
@@ -2332,7 +2394,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="132">
+          <li class="never" data-hits="" data-linenumber="138">
             
 
             
@@ -2342,7 +2404,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="52" data-linenumber="133">
+          <li class="covered" data-hits="52" data-linenumber="139">
             
               <span class="hits">52</span>
             
@@ -2354,7 +2416,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="52" data-linenumber="134">
+          <li class="covered" data-hits="52" data-linenumber="140">
             
               <span class="hits">52</span>
             
@@ -2366,70 +2428,6 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="52" data-linenumber="135">
-            
-              <span class="hits">52</span>
-            
-
-            
-
-            <code class="ruby">    @books = @books.limit(per_page).offset(offset)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="136">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="137">
-            
-
-            
-
-            <code class="ruby">    # Eager load authors for JSON serialization to avoid N+1</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="52" data-linenumber="138">
-            
-              <span class="hits">52</span>
-            
-
-            
-
-            <code class="ruby">    @books = @books.includes(:authors)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="139">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="140">
-            
-
-            
-
-            <code class="ruby">    # Calculate pagination metadata</code>
-          </li>
-        </div>
-      
-        <div>
           <li class="covered" data-hits="52" data-linenumber="141">
             
               <span class="hits">52</span>
@@ -2437,7 +2435,7 @@
 
             
 
-            <code class="ruby">    total_pages = total_count == 0 ? 0 : (total_count.to_f / per_page).ceil</code>
+            <code class="ruby">    @books = @books.limit(per_page).offset(offset)</code>
           </li>
         </div>
       
@@ -2457,7 +2455,7 @@
 
             
 
-            <code class="ruby">    # Prepare response with pagination metadata</code>
+            <code class="ruby">    # Eager load authors for JSON serialization to avoid N+1</code>
           </li>
         </div>
       
@@ -2469,12 +2467,76 @@
 
             
 
+            <code class="ruby">    @books = @books.includes(:authors)</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="145">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="146">
+            
+
+            
+
+            <code class="ruby">    # Calculate pagination metadata</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="52" data-linenumber="147">
+            
+              <span class="hits">52</span>
+            
+
+            
+
+            <code class="ruby">    total_pages = total_count.zero? ? 0 : (total_count.to_f / per_page).ceil</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="148">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="149">
+            
+
+            
+
+            <code class="ruby">    # Prepare response with pagination metadata</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="52" data-linenumber="150">
+            
+              <span class="hits">52</span>
+            
+
+            
+
             <code class="ruby">    books_with_sorted_authors = @books.map do |book|</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="179" data-linenumber="145">
+          <li class="covered" data-hits="179" data-linenumber="151">
             
               <span class="hits">179</span>
             
@@ -2486,7 +2548,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="146">
+          <li class="never" data-hits="" data-linenumber="152">
             
 
             
@@ -2496,7 +2558,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="147">
+          <li class="never" data-hits="" data-linenumber="153">
             
 
             
@@ -2506,7 +2568,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="148">
+          <li class="never" data-hits="" data-linenumber="154">
             
 
             
@@ -2516,7 +2578,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="149">
+          <li class="never" data-hits="" data-linenumber="155">
             
 
             
@@ -2526,7 +2588,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="150">
+          <li class="never" data-hits="" data-linenumber="156">
             
 
             
@@ -2536,7 +2598,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="52" data-linenumber="151">
+          <li class="covered" data-hits="52" data-linenumber="157">
             
               <span class="hits">52</span>
             
@@ -2548,7 +2610,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="152">
+          <li class="never" data-hits="" data-linenumber="158">
             
 
             
@@ -2558,7 +2620,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="153">
+          <li class="never" data-hits="" data-linenumber="159">
             
 
             
@@ -2568,7 +2630,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="154">
+          <li class="never" data-hits="" data-linenumber="160">
             
 
             
@@ -2578,7 +2640,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="155">
+          <li class="never" data-hits="" data-linenumber="161">
             
 
             
@@ -2588,7 +2650,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="156">
+          <li class="never" data-hits="" data-linenumber="162">
             
 
             
@@ -2598,7 +2660,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="157">
+          <li class="never" data-hits="" data-linenumber="163">
             
 
             
@@ -2608,7 +2670,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="158">
+          <li class="never" data-hits="" data-linenumber="164">
             
 
             
@@ -2618,7 +2680,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="159">
+          <li class="never" data-hits="" data-linenumber="165">
             
 
             
@@ -2628,7 +2690,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="160">
+          <li class="never" data-hits="" data-linenumber="166">
             
 
             
@@ -2638,7 +2700,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="161">
+          <li class="never" data-hits="" data-linenumber="167">
             
 
             
@@ -2648,7 +2710,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="52" data-linenumber="162">
+          <li class="covered" data-hits="52" data-linenumber="168">
             
               <span class="hits">52</span>
             
@@ -2656,72 +2718,6 @@
             
 
             <code class="ruby">    render json: response_data</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="163">
-            
-
-            
-
-            <code class="ruby">  end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="164">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="165">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">  private</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="166">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="167">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">  def set_book</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="16" data-linenumber="168">
-            
-              <span class="hits">16</span>
-            
-
-            
-
-            <code class="ruby">    @book = Book.find(params[:id])</code>
           </li>
         </div>
       
@@ -2753,12 +2749,78 @@
 
             
 
+            <code class="ruby">  private</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="172">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="173">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def set_book</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="16" data-linenumber="174">
+            
+              <span class="hits">16</span>
+            
+
+            
+
+            <code class="ruby">    @book = Book.find(params[:id])</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="175">
+            
+
+            
+
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="176">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="177">
+            
+              <span class="hits">1</span>
+            
+
+            
+
             <code class="ruby">  def book_params</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="13" data-linenumber="172">
+          <li class="covered" data-hits="13" data-linenumber="178">
             
               <span class="hits">13</span>
             
@@ -2770,7 +2832,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="173">
+          <li class="never" data-hits="" data-linenumber="179">
             
 
             
@@ -2780,7 +2842,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="174">
+          <li class="never" data-hits="" data-linenumber="180">
             
 
             
@@ -2790,19 +2852,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="175">
+          <li class="covered" data-hits="1" data-linenumber="181">
             
               <span class="hits">1</span>
             
 
             
 
-            <code class="ruby">  def validate_filter_count(values, filter_type, max_count = 10)</code>
+            <code class="ruby">  def valid_filter_count?(values, filter_type, max_count = 10)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="10" data-linenumber="176">
+          <li class="covered" data-hits="10" data-linenumber="182">
             
               <span class="hits">10</span>
             
@@ -2814,7 +2876,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="177">
+          <li class="covered" data-hits="3" data-linenumber="183">
             
               <span class="hits">3</span>
             
@@ -2826,7 +2888,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="178">
+          <li class="covered" data-hits="3" data-linenumber="184">
             
               <span class="hits">3</span>
             
@@ -2838,7 +2900,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="179">
+          <li class="never" data-hits="" data-linenumber="185">
             
 
             
@@ -2848,7 +2910,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="7" data-linenumber="180">
+          <li class="covered" data-hits="7" data-linenumber="186">
             
               <span class="hits">7</span>
             
@@ -2860,7 +2922,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="181">
+          <li class="never" data-hits="" data-linenumber="187">
             
 
             
@@ -2870,7 +2932,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="182">
+          <li class="never" data-hits="" data-linenumber="188">
             
 
             
@@ -2880,7 +2942,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="183">
+          <li class="covered" data-hits="1" data-linenumber="189">
             
               <span class="hits">1</span>
             
@@ -2892,7 +2954,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="184">
+          <li class="covered" data-hits="3" data-linenumber="190">
             
               <span class="hits">3</span>
             
@@ -2904,7 +2966,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="185">
+          <li class="never" data-hits="" data-linenumber="191">
             
 
             
@@ -2914,7 +2976,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="186">
+          <li class="never" data-hits="" data-linenumber="192">
             
 
             
@@ -2924,7 +2986,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="187">
+          <li class="covered" data-hits="1" data-linenumber="193">
             
               <span class="hits">1</span>
             
@@ -2936,7 +2998,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="188">
+          <li class="covered" data-hits="1" data-linenumber="194">
             
               <span class="hits">1</span>
             
@@ -2948,7 +3010,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="189">
+          <li class="never" data-hits="" data-linenumber="195">
             
 
             
@@ -2958,7 +3020,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="190">
+          <li class="never" data-hits="" data-linenumber="196">
             
 
             
@@ -2968,7 +3030,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="191">
+          <li class="never" data-hits="" data-linenumber="197">
             
 
             
@@ -2978,7 +3040,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="192">
+          <li class="covered" data-hits="1" data-linenumber="198">
             
               <span class="hits">1</span>
             
@@ -2990,7 +3052,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="2" data-linenumber="193">
+          <li class="covered" data-hits="2" data-linenumber="199">
             
               <span class="hits">2</span>
             
@@ -3002,7 +3064,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="194">
+          <li class="never" data-hits="" data-linenumber="200">
             
 
             
@@ -3012,7 +3074,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="195">
+          <li class="never" data-hits="" data-linenumber="201">
             
 
             
@@ -3022,19 +3084,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="196">
+          <li class="covered" data-hits="1" data-linenumber="202">
             
               <span class="hits">1</span>
             
 
             
 
-            <code class="ruby">  def apply_q_filter</code>
+            <code class="ruby">  def q_filter_applied?</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="66" data-linenumber="197">
+          <li class="covered" data-hits="66" data-linenumber="203">
             
               <span class="hits">66</span>
             
@@ -3046,7 +3108,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="198">
+          <li class="never" data-hits="" data-linenumber="204">
             
 
             
@@ -3056,7 +3118,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="16" data-linenumber="199">
+          <li class="covered" data-hits="16" data-linenumber="205">
             
               <span class="hits">16</span>
             
@@ -3068,7 +3130,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="200">
+          <li class="never" data-hits="" data-linenumber="206">
             
 
             
@@ -3078,7 +3140,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="16" data-linenumber="201">
+          <li class="covered" data-hits="16" data-linenumber="207">
             
               <span class="hits">16</span>
             
@@ -3090,7 +3152,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="16" data-linenumber="202">
+          <li class="covered" data-hits="16" data-linenumber="208">
             
               <span class="hits">16</span>
             
@@ -3102,7 +3164,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="203">
+          <li class="never" data-hits="" data-linenumber="209">
             
 
             
@@ -3112,7 +3174,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="204">
+          <li class="never" data-hits="" data-linenumber="210">
             
 
             
@@ -3122,7 +3184,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="205">
+          <li class="never" data-hits="" data-linenumber="211">
             
 
             
@@ -3132,7 +3194,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="16" data-linenumber="206">
+          <li class="covered" data-hits="16" data-linenumber="212">
             
               <span class="hits">16</span>
             
@@ -3144,76 +3206,12 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="207">
+          <li class="never" data-hits="" data-linenumber="213">
             
 
             
 
             <code class="ruby">    end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="208">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="missed" data-hits="0" data-linenumber="209">
-            
-
-            
-
-            <code class="ruby">    false</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="210">
-            
-
-            
-
-            <code class="ruby">  end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="211">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="212">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">  def error_applying_title_filter?</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="66" data-linenumber="213">
-            
-              <span class="hits">66</span>
-            
-
-            
-
-            <code class="ruby">    return false unless params.dig(:filter, :title).present?</code>
           </li>
         </div>
       
@@ -3228,14 +3226,12 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="4" data-linenumber="215">
-            
-              <span class="hits">4</span>
+          <li class="missed" data-hits="0" data-linenumber="215">
             
 
             
 
-            <code class="ruby">    titles = params.dig(:filter, :title).split(&quot;,&quot;).map(&amp;:strip).reject(&amp;:blank?)</code>
+            <code class="ruby">    false</code>
           </li>
         </div>
       
@@ -3245,12 +3241,78 @@
 
             
 
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="217">
+            
+
+            
+
             <code class="ruby"></code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="4" data-linenumber="217">
+          <li class="covered" data-hits="1" data-linenumber="218">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def error_applying_title_filter?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="66" data-linenumber="219">
+            
+              <span class="hits">66</span>
+            
+
+            
+
+            <code class="ruby">    return false unless params.dig(:filter, :title).present?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="220">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="4" data-linenumber="221">
+            
+              <span class="hits">4</span>
+            
+
+            
+
+            <code class="ruby">    titles = params.dig(:filter, :title).split(&quot;,&quot;).map(&amp;:strip).compact_blank</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="222">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="4" data-linenumber="223">
             
               <span class="hits">4</span>
             
@@ -3262,7 +3324,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="218">
+          <li class="missed" data-hits="0" data-linenumber="224">
             
 
             
@@ -3272,7 +3334,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="219">
+          <li class="missed" data-hits="0" data-linenumber="225">
             
 
             
@@ -3282,7 +3344,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="220">
+          <li class="never" data-hits="" data-linenumber="226">
             
 
             
@@ -3292,7 +3354,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="221">
+          <li class="never" data-hits="" data-linenumber="227">
             
 
             
@@ -3302,19 +3364,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="4" data-linenumber="222">
+          <li class="covered" data-hits="4" data-linenumber="228">
             
               <span class="hits">4</span>
             
 
             
 
-            <code class="ruby">    unless validate_filter_count(titles, &quot;title&quot;)</code>
+            <code class="ruby">    unless valid_filter_count?(titles, &quot;title&quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="223">
+          <li class="covered" data-hits="1" data-linenumber="229">
             
               <span class="hits">1</span>
             
@@ -3322,74 +3384,6 @@
             
 
             <code class="ruby">      return true</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="224">
-            
-
-            
-
-            <code class="ruby">    end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="225">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="3" data-linenumber="226">
-            
-              <span class="hits">3</span>
-            
-
-            
-
-            <code class="ruby">    if titles.any?</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="8" data-linenumber="227">
-            
-              <span class="hits">8</span>
-            
-
-            
-
-            <code class="ruby">      title_conditions = titles.map { &quot;title ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="8" data-linenumber="228">
-            
-              <span class="hits">8</span>
-            
-
-            
-
-            <code class="ruby">      title_values = titles.map { |title| &quot;%#{title}%&quot; }</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="3" data-linenumber="229">
-            
-              <span class="hits">3</span>
-            
-
-            
-
-            <code class="ruby">      @books = @books.where(title_conditions, *title_values)</code>
           </li>
         </div>
       
@@ -3421,51 +3415,53 @@
 
             
 
-            <code class="ruby">    false</code>
+            <code class="ruby">    if titles.any?</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="233">
+          <li class="covered" data-hits="8" data-linenumber="233">
+            
+              <span class="hits">8</span>
             
 
             
 
-            <code class="ruby">  end</code>
+            <code class="ruby">      title_conditions = titles.map { &quot;title ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="234">
+          <li class="covered" data-hits="8" data-linenumber="234">
+            
+              <span class="hits">8</span>
             
 
             
 
-            <code class="ruby"></code>
+            <code class="ruby">      title_values = titles.map { |title| &quot;%#{title}%&quot; }</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="235">
+          <li class="covered" data-hits="3" data-linenumber="235">
             
-              <span class="hits">1</span>
-            
-
+              <span class="hits">3</span>
             
 
-            <code class="ruby">  def error_applying_author_filter?</code>
+            
+
+            <code class="ruby">      @books = @books.where(title_conditions, *title_values)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="65" data-linenumber="236">
-            
-              <span class="hits">65</span>
+          <li class="never" data-hits="" data-linenumber="236">
             
 
             
 
-            <code class="ruby">    return false unless params.dig(:filter, :author).present?</code>
+            <code class="ruby">    end</code>
           </li>
         </div>
       
@@ -3487,7 +3483,7 @@
 
             
 
-            <code class="ruby">    authors = params.dig(:filter, :author).split(&quot;,&quot;).map(&amp;:strip).reject(&amp;:blank?)</code>
+            <code class="ruby">    false</code>
           </li>
         </div>
       
@@ -3497,12 +3493,78 @@
 
             
 
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="240">
+            
+
+            
+
             <code class="ruby"></code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="240">
+          <li class="covered" data-hits="1" data-linenumber="241">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def error_applying_author_filter?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="65" data-linenumber="242">
+            
+              <span class="hits">65</span>
+            
+
+            
+
+            <code class="ruby">    return false unless params.dig(:filter, :author).present?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="243">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="3" data-linenumber="244">
+            
+              <span class="hits">3</span>
+            
+
+            
+
+            <code class="ruby">    authors = params.dig(:filter, :author).split(&quot;,&quot;).map(&amp;:strip).compact_blank</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="245">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="3" data-linenumber="246">
             
               <span class="hits">3</span>
             
@@ -3514,7 +3576,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="241">
+          <li class="missed" data-hits="0" data-linenumber="247">
             
 
             
@@ -3524,7 +3586,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="242">
+          <li class="missed" data-hits="0" data-linenumber="248">
             
 
             
@@ -3534,7 +3596,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="243">
+          <li class="never" data-hits="" data-linenumber="249">
             
 
             
@@ -3544,7 +3606,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="244">
+          <li class="never" data-hits="" data-linenumber="250">
             
 
             
@@ -3554,19 +3616,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="245">
+          <li class="covered" data-hits="3" data-linenumber="251">
             
               <span class="hits">3</span>
             
 
             
 
-            <code class="ruby">    unless validate_filter_count(authors, &quot;author&quot;)</code>
+            <code class="ruby">    unless valid_filter_count?(authors, &quot;author&quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="246">
+          <li class="covered" data-hits="1" data-linenumber="252">
             
               <span class="hits">1</span>
             
@@ -3574,74 +3636,6 @@
             
 
             <code class="ruby">      return true</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="247">
-            
-
-            
-
-            <code class="ruby">    end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="248">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="2" data-linenumber="249">
-            
-              <span class="hits">2</span>
-            
-
-            
-
-            <code class="ruby">    if authors.any?</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="5" data-linenumber="250">
-            
-              <span class="hits">5</span>
-            
-
-            
-
-            <code class="ruby">      author_conditions = authors.map { &quot;authors.name ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="5" data-linenumber="251">
-            
-              <span class="hits">5</span>
-            
-
-            
-
-            <code class="ruby">      author_values = authors.map { |author| &quot;%#{author}%&quot; }</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="2" data-linenumber="252">
-            
-              <span class="hits">2</span>
-            
-
-            
-
-            <code class="ruby">      @books = @books.joins(:authors).where(author_conditions, *author_values).distinct</code>
           </li>
         </div>
       
@@ -3673,51 +3667,53 @@
 
             
 
-            <code class="ruby">    false</code>
+            <code class="ruby">    if authors.any?</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="256">
+          <li class="covered" data-hits="5" data-linenumber="256">
+            
+              <span class="hits">5</span>
             
 
             
 
-            <code class="ruby">  end</code>
+            <code class="ruby">      author_conditions = authors.map { &quot;authors.name ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="257">
+          <li class="covered" data-hits="5" data-linenumber="257">
+            
+              <span class="hits">5</span>
             
 
             
 
-            <code class="ruby"></code>
+            <code class="ruby">      author_values = authors.map { |author| &quot;%#{author}%&quot; }</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="258">
+          <li class="covered" data-hits="2" data-linenumber="258">
             
-              <span class="hits">1</span>
-            
-
+              <span class="hits">2</span>
             
 
-            <code class="ruby">  def error_applying_isbn_filter?</code>
+            
+
+            <code class="ruby">      @books = @books.joins(:authors).where(author_conditions, *author_values).distinct</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="64" data-linenumber="259">
-            
-              <span class="hits">64</span>
+          <li class="never" data-hits="" data-linenumber="259">
             
 
             
 
-            <code class="ruby">    return false unless params.dig(:filter, :isbn).present?</code>
+            <code class="ruby">    end</code>
           </li>
         </div>
       
@@ -3732,14 +3728,14 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="261">
+          <li class="covered" data-hits="2" data-linenumber="261">
             
-              <span class="hits">3</span>
-            
-
+              <span class="hits">2</span>
             
 
-            <code class="ruby">    isbns = params.dig(:filter, :isbn).split(&quot;,&quot;).map(&amp;:strip).reject(&amp;:blank?)</code>
+            
+
+            <code class="ruby">    false</code>
           </li>
         </div>
       
@@ -3749,12 +3745,78 @@
 
             
 
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="263">
+            
+
+            
+
             <code class="ruby"></code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="263">
+          <li class="covered" data-hits="1" data-linenumber="264">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def error_applying_isbn_filter?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="64" data-linenumber="265">
+            
+              <span class="hits">64</span>
+            
+
+            
+
+            <code class="ruby">    return false unless params.dig(:filter, :isbn).present?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="266">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="3" data-linenumber="267">
+            
+              <span class="hits">3</span>
+            
+
+            
+
+            <code class="ruby">    isbns = params.dig(:filter, :isbn).split(&quot;,&quot;).map(&amp;:strip).compact_blank</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="268">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="3" data-linenumber="269">
             
               <span class="hits">3</span>
             
@@ -3766,7 +3828,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="264">
+          <li class="missed" data-hits="0" data-linenumber="270">
             
 
             
@@ -3776,7 +3838,7 @@
         </div>
       
         <div>
-          <li class="missed" data-hits="0" data-linenumber="265">
+          <li class="missed" data-hits="0" data-linenumber="271">
             
 
             
@@ -3786,7 +3848,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="266">
+          <li class="never" data-hits="" data-linenumber="272">
             
 
             
@@ -3796,7 +3858,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="267">
+          <li class="never" data-hits="" data-linenumber="273">
             
 
             
@@ -3806,19 +3868,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="268">
+          <li class="covered" data-hits="3" data-linenumber="274">
             
               <span class="hits">3</span>
             
 
             
 
-            <code class="ruby">    unless validate_filter_count(isbns, &quot;ISBN&quot;)</code>
+            <code class="ruby">    unless valid_filter_count?(isbns, &quot;ISBN&quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="269">
+          <li class="covered" data-hits="1" data-linenumber="275">
             
               <span class="hits">1</span>
             
@@ -3826,74 +3888,6 @@
             
 
             <code class="ruby">      return true</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="270">
-            
-
-            
-
-            <code class="ruby">    end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="271">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="2" data-linenumber="272">
-            
-              <span class="hits">2</span>
-            
-
-            
-
-            <code class="ruby">    if isbns.any?</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="6" data-linenumber="273">
-            
-              <span class="hits">6</span>
-            
-
-            
-
-            <code class="ruby">      isbn_conditions = isbns.map { &quot;isbn ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="6" data-linenumber="274">
-            
-              <span class="hits">6</span>
-            
-
-            
-
-            <code class="ruby">      isbn_values = isbns.map { |isbn| &quot;%#{isbn}%&quot; }</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="2" data-linenumber="275">
-            
-              <span class="hits">2</span>
-            
-
-            
-
-            <code class="ruby">      @books = @books.where(isbn_conditions, *isbn_values)</code>
           </li>
         </div>
       
@@ -3925,51 +3919,53 @@
 
             
 
-            <code class="ruby">    false</code>
+            <code class="ruby">    if isbns.any?</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="279">
+          <li class="covered" data-hits="6" data-linenumber="279">
+            
+              <span class="hits">6</span>
             
 
             
 
-            <code class="ruby">  end</code>
+            <code class="ruby">      isbn_conditions = isbns.map { &quot;isbn ILIKE ?&quot; }.join(&quot; OR &quot;)</code>
           </li>
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="280">
+          <li class="covered" data-hits="6" data-linenumber="280">
+            
+              <span class="hits">6</span>
             
 
             
 
-            <code class="ruby"></code>
+            <code class="ruby">      isbn_values = isbns.map { |isbn| &quot;%#{isbn}%&quot; }</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="281">
+          <li class="covered" data-hits="2" data-linenumber="281">
             
-              <span class="hits">1</span>
-            
-
+              <span class="hits">2</span>
             
 
-            <code class="ruby">  def error_applying_status_filter?</code>
+            
+
+            <code class="ruby">      @books = @books.where(isbn_conditions, *isbn_values)</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="63" data-linenumber="282">
-            
-              <span class="hits">63</span>
+          <li class="never" data-hits="" data-linenumber="282">
             
 
             
 
-            <code class="ruby">    return false unless params.dig(:filter, :status).present?</code>
+            <code class="ruby">    end</code>
           </li>
         </div>
       
@@ -3984,7 +3980,73 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="7" data-linenumber="284">
+          <li class="covered" data-hits="2" data-linenumber="284">
+            
+              <span class="hits">2</span>
+            
+
+            
+
+            <code class="ruby">    false</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="285">
+            
+
+            
+
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="286">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="287">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def error_applying_status_filter?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="63" data-linenumber="288">
+            
+              <span class="hits">63</span>
+            
+
+            
+
+            <code class="ruby">    return false unless params.dig(:filter, :status).present?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="289">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="7" data-linenumber="290">
             
               <span class="hits">7</span>
             
@@ -3996,7 +4058,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="7" data-linenumber="285">
+          <li class="covered" data-hits="7" data-linenumber="291">
             
               <span class="hits">7</span>
             
@@ -4008,7 +4070,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="6" data-linenumber="286">
+          <li class="covered" data-hits="6" data-linenumber="292">
             
               <span class="hits">6</span>
             
@@ -4020,7 +4082,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="287">
+          <li class="never" data-hits="" data-linenumber="293">
             
 
             
@@ -4030,7 +4092,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="288">
+          <li class="covered" data-hits="1" data-linenumber="294">
             
               <span class="hits">1</span>
             
@@ -4042,7 +4104,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="289">
+          <li class="covered" data-hits="1" data-linenumber="295">
             
               <span class="hits">1</span>
             
@@ -4054,78 +4116,12 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="290">
+          <li class="never" data-hits="" data-linenumber="296">
             
 
             
 
             <code class="ruby">    end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="291">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="6" data-linenumber="292">
-            
-              <span class="hits">6</span>
-            
-
-            
-
-            <code class="ruby">    false</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="293">
-            
-
-            
-
-            <code class="ruby">  end</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="294">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="295">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">  def error_applying_borrowed_until_filter?</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="62" data-linenumber="296">
-            
-              <span class="hits">62</span>
-            
-
-            
-
-            <code class="ruby">    return false unless params.dig(:filter, :borrowed_until).present?</code>
           </li>
         </div>
       
@@ -4140,7 +4136,73 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="298">
+          <li class="covered" data-hits="6" data-linenumber="298">
+            
+              <span class="hits">6</span>
+            
+
+            
+
+            <code class="ruby">    false</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="299">
+            
+
+            
+
+            <code class="ruby">  end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="300">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="301">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">  def error_applying_borrowed_until_filter?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="62" data-linenumber="302">
+            
+              <span class="hits">62</span>
+            
+
+            
+
+            <code class="ruby">    return false unless params.dig(:filter, :borrowed_until).present?</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="303">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="304">
             
 
             
@@ -4150,7 +4212,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="3" data-linenumber="299">
+          <li class="covered" data-hits="3" data-linenumber="305">
             
               <span class="hits">3</span>
             
@@ -4162,7 +4224,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="2" data-linenumber="300">
+          <li class="covered" data-hits="2" data-linenumber="306">
             
               <span class="hits">2</span>
             
@@ -4174,7 +4236,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="301">
+          <li class="never" data-hits="" data-linenumber="307">
             
 
             
@@ -4184,7 +4246,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="302">
+          <li class="covered" data-hits="1" data-linenumber="308">
             
               <span class="hits">1</span>
             
@@ -4196,7 +4258,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="303">
+          <li class="covered" data-hits="1" data-linenumber="309">
             
               <span class="hits">1</span>
             
@@ -4208,7 +4270,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="304">
+          <li class="never" data-hits="" data-linenumber="310">
             
 
             
@@ -4218,7 +4280,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="305">
+          <li class="never" data-hits="" data-linenumber="311">
             
 
             
@@ -4228,7 +4290,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="2" data-linenumber="306">
+          <li class="covered" data-hits="2" data-linenumber="312">
             
               <span class="hits">2</span>
             
@@ -4240,7 +4302,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="307">
+          <li class="never" data-hits="" data-linenumber="313">
             
 
             
@@ -4250,7 +4312,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="308">
+          <li class="never" data-hits="" data-linenumber="314">
             
 
             
@@ -4260,19 +4322,19 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="1" data-linenumber="309">
+          <li class="covered" data-hits="1" data-linenumber="315">
             
               <span class="hits">1</span>
             
 
             
 
-            <code class="ruby">  def validate_at_least_one_filter</code>
+            <code class="ruby">  def at_least_one_filter_valid?</code>
           </li>
         </div>
       
         <div>
-          <li class="covered" data-hits="61" data-linenumber="310">
+          <li class="covered" data-hits="61" data-linenumber="316">
             
               <span class="hits">61</span>
             
@@ -4284,7 +4346,7 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="341" data-linenumber="311">
+          <li class="covered" data-hits="341" data-linenumber="317">
             
               <span class="hits">341</span>
             
@@ -4296,7 +4358,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="312">
+          <li class="never" data-hits="" data-linenumber="318">
             
 
             
@@ -4306,7 +4368,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="313">
+          <li class="never" data-hits="" data-linenumber="319">
             
 
             
@@ -4316,80 +4378,14 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="61" data-linenumber="314">
+          <li class="covered" data-hits="61" data-linenumber="320">
             
               <span class="hits">61</span>
             
 
             
 
-            <code class="ruby">    has_q_param = params[:filter] &amp;&amp; params[:filter].key?(:q)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="315">
-            
-
-            
-
-            <code class="ruby"></code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="316">
-            
-
-            
-
-            <code class="ruby">    # Only return error if no filters at all AND no q parameter (even empty ones)</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="61" data-linenumber="317">
-            
-              <span class="hits">61</span>
-            
-
-            
-
-            <code class="ruby">    if !@has_q_filter &amp;&amp; !has_other_filters &amp;&amp; !has_q_param</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="318">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">      render json: { error: &quot;At least one search parameter is required&quot; }, status: :bad_request</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="covered" data-hits="1" data-linenumber="319">
-            
-              <span class="hits">1</span>
-            
-
-            
-
-            <code class="ruby">      return false</code>
-          </li>
-        </div>
-      
-        <div>
-          <li class="never" data-hits="" data-linenumber="320">
-            
-
-            
-
-            <code class="ruby">    end</code>
+            <code class="ruby">    has_q_param = params[:filter]&amp;.key?(:q)</code>
           </li>
         </div>
       
@@ -4404,7 +4400,73 @@
         </div>
       
         <div>
-          <li class="covered" data-hits="60" data-linenumber="322">
+          <li class="never" data-hits="" data-linenumber="322">
+            
+
+            
+
+            <code class="ruby">    # Only return error if no filters at all AND no q parameter (even empty ones)</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="61" data-linenumber="323">
+            
+              <span class="hits">61</span>
+            
+
+            
+
+            <code class="ruby">    if !@has_q_filter &amp;&amp; !has_other_filters &amp;&amp; !has_q_param</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="324">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">      render json: { error: &quot;At least one search parameter is required&quot; }, status: :bad_request</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="1" data-linenumber="325">
+            
+              <span class="hits">1</span>
+            
+
+            
+
+            <code class="ruby">      return false</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="326">
+            
+
+            
+
+            <code class="ruby">    end</code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="never" data-hits="" data-linenumber="327">
+            
+
+            
+
+            <code class="ruby"></code>
+          </li>
+        </div>
+      
+        <div>
+          <li class="covered" data-hits="60" data-linenumber="328">
             
               <span class="hits">60</span>
             
@@ -4416,7 +4478,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="323">
+          <li class="never" data-hits="" data-linenumber="329">
             
 
             
@@ -4426,7 +4488,7 @@
         </div>
       
         <div>
-          <li class="never" data-hits="" data-linenumber="324">
+          <li class="never" data-hits="" data-linenumber="330">
             
 
             
