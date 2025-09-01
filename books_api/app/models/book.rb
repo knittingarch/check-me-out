@@ -1,8 +1,10 @@
 class Book < ApplicationRecord
+  has_and_belongs_to_many :authors
+
   enum status: { available: 0, borrowed: 1, reserved: 2 }
 
   validates :title, presence: true
-  validates :author, presence: true
+  validates :authors, presence: true
   validates :isbn, presence: true, uniqueness: { unless: :multiple_copies_allowed? }
   validates :published_date, presence: true
   validates :status, presence: true
@@ -32,7 +34,19 @@ class Book < ApplicationRecord
   private
 
   def multiple_copies_allowed?
-    # Allow multiple copies if there's already a book with the same title, author, AND isbn (the same book)
-    Book.where(title: title, author: author, isbn: isbn).where.not(id: id).exists?
+    # Allow multiple copies if there's already a book with the same title,
+    # authors, AND isbn (the same book)
+    existing_books = Book.where(title: title, isbn: isbn).where.not(id: id)
+
+    current_author_ids = if persisted?
+      authors.pluck(:id).sort
+    else
+      # For unsaved records, get author IDs from the association
+      authors.map(&:id).compact.sort
+    end
+
+    existing_books.any? do |existing_book|
+      existing_book.authors.pluck(:id).sort == current_author_ids
+    end
   end
 end
